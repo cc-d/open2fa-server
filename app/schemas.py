@@ -8,3 +8,9 @@ class TOTP(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class TOTPCreate(TOTP):
+    user_hash: str
+    enc_secret: str
+    org_name: str
