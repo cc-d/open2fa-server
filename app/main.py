@@ -24,11 +24,9 @@ async def index_status():
 
 
 @app.post('/totp', response_model=schemas.TOTP)
-@logf(level='INFO', use_print=True)
 async def create_totp(
     new_totp: schemas.TOTP, db: Session = Depends(get_db)
 ) -> schemas.TOTP:
-    print(f"new_totp: {new_totp}", '@' * 80)
     lg.info(f"new_totp: {new_totp}")
 
     lg.info(f"creating new_totp: {new_totp}")
@@ -48,24 +46,31 @@ async def read_totps(
 
 
 @app.get('/totp/{enc_secret}', response_model=schemas.TOTP)
-async def read_totp(enc_sec: str, user_totps=Depends(get_totp_from_reqhash)):
-    totp = next(
-        (totp for totp in user_totps if totp.enc_secret == enc_sec), None
+async def read_totp(
+    enc_secret: str, user_totps=Depends(get_totp_from_reqhash)
+):
+    print(
+        user_totps, enc_secret, type(user_totps), type(enc_secret), 'zzz' * 100
     )
+    totp = None
+    for totp in user_totps:
+        if totp.enc_secret == enc_secret:
+            break
+
     if totp is None:
         raise HTTPException(status_code=404, detail="TOTP not found")
     return totp
 
 
-@app.delete('/totp/{enc_secret}', response_model=schemas.TOTP)
+@app.delete('/totp/{enc_secret}')
 async def delete_totp(
-    enc_sec: str,
+    enc_secret: str,
     user_totps=Depends(get_totp_from_reqhash),
     db: Session = Depends(get_db),
 ):
     del_totp = None
     for totp in user_totps:
-        if totp.enc_secret == enc_sec:
+        if totp.enc_secret == enc_secret:
             del_totp = totp
             break
     if del_totp is None:

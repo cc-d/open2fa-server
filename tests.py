@@ -9,6 +9,7 @@ from uuid import uuid4
 from pyshared import ranstr
 from functools import wraps
 from unittest.mock import patch
+from logfunc import logf
 
 
 def _testuuid():
@@ -18,24 +19,36 @@ def _testuuid():
 TEST_UID = _testuuid()
 TEST_ORG = 'Test Org'
 TEST_TOTP = 'JBSWY3DPEHPK3PXP'
-TEST_ENC_SEC = 'gAAAAABlq_ia8qJoDt5weWB_BKoOOrhh-FNQHwyVnV0reVIKGH74chN_PCkdWz3MR_TFOzsBqRGCvcpvHf8-f5lNZwkJxwf83_z8hBgQNoDJdiPXUj427jo='
-# TEST_ENC_SEC = ranstr(32)
+# TEST_ENC_SEC = 'gAAAAABlq_ia8qJoDt5weWB_BKoOOrhh-FNQHwyVnV0reVIKGH74chN_PCkdWz3MR_TFOzsBqRGCvcpvHf8-f5lNZwkJxwf83_z8hBgQNoDJdiPXUj427jo='
+TEST_ENC_SEC = ranstr(32)
 TEST_SEC = 'JBSWY3DPEHPK3PXP'
 
 
 @pytest.fixture(scope="session")
-def client():
-    # Ensure the test database is correctly bound
-    _db.Base.metadata.bind = _db.test_engine
+def test_engine():
+    engine = create_engine(cfg.TEST_DB_URI)
+    yield engine
+    engine.dispose()
 
-    # Create all tables in the test database
-    _db.Base.metadata.create_all(bind=_db.test_engine)
 
-    with TestClient(app) as client:
+@pytest.fixture(scope="function")
+def test_db():
+    # Create the in-memory SQLite database for each test
+    engine = create_engine(cfg.TEST_DB_URI)
+    _db.Base.metadata.create_all(bind=engine)
+
+    yield engine
+
+    _db.Base.metadata.drop_all(bind=engine)
+    engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def client(test_db):
+    with TestClient(
+        app, base_url="http://testserver", headers={'X-User-Hash': TEST_UID}
+    ) as client:
         yield client
-
-    # Drop all tables after the tests are done
-    _db.Base.metadata.drop_all(bind=_db.test_engine)
 
 
 def test_index_status(client):
@@ -69,6 +82,8 @@ def test_read_totps(client):
 
 
 def test_read_totp(client):
+    client.get = logf(level='INFO', use_print=True)(client.get)
+
     response = client.get(f"/totp/{TEST_ENC_SEC}")
     assert response.status_code == 200
     totp = response.json()
