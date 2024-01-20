@@ -1,15 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
 from typing import List
-from . import models
-from . import schemas
+
 from .db import get_db
+from app import db as _db
+from app import models
+from app import schemas
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, FastAPI, HTTPException, status, Request
 from .deps import get_user_totps, get_totp_from_reqhash
 
 import logging as lg
+from logfunc import logf
+
 
 app = FastAPI()
 
@@ -20,9 +24,11 @@ async def index_status():
 
 
 @app.post('/totp', response_model=schemas.TOTP)
+@logf(level='INFO', use_print=True)
 async def create_totp(
     new_totp: schemas.TOTP, db: Session = Depends(get_db)
 ) -> schemas.TOTP:
+    print(f"new_totp: {new_totp}", '@' * 80)
     lg.info(f"new_totp: {new_totp}")
 
     lg.info(f"creating new_totp: {new_totp}")

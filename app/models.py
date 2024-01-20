@@ -1,10 +1,9 @@
 from sqlalchemy import Column, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, declarative_base
+from app import db as _db
 
-Base = declarative_base()
 
-
-class TOTP(Base):
+class TOTP(_db.Base):
     __tablename__ = 'totps'
     enc_secret: Mapped[str] = mapped_column(
         Text, primary_key=True, index=True, nullable=False
@@ -21,3 +20,6 @@ class TOTP(Base):
             f"<TOTP enc_secret={self.enc_secret[:3]}..."
             f" user_hash={self.user_hash[:3]}... org_name={self.org_name}>"
         )
+
+
+_db.Base.metadata.create_all(bind=_db.engine)
