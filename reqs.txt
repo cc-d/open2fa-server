@@ -17,3 +17,5 @@ uvicorn==0.26.0
 open2fa>=0.1.0
 pytest
 pytest-cov
+alembic==1.13.1
+

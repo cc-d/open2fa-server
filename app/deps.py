@@ -2,15 +2,16 @@ from .models import TOTP
 
 from sqlalchemy.orm import Session
 from fastapi import Depends, FastAPI, HTTPException, status, Request
+from .db import get_db
 
-from .schemas import TOTP as TOTPSchema
 
-
-async def get_user_totps(uhash: str, db: Session) -> list[TOTP]:
+def get_user_totps(uhash: str, db: Session = Depends(get_db)) -> list[TOTP]:
     return db.query(TOTP).filter(TOTP.user_hash == uhash).all()
 
 
-async def get_totp_from_reqhash(req: Request, db: Session) -> list[TOTP]:
+def get_totp_from_reqhash(
+    req: Request, db: Session = Depends(get_db)
+) -> list[TOTP]:
     uhash = req.headers.get('X-User-Hash', None)
     if uhash is None:
         raise HTTPException(
