@@ -9,11 +9,13 @@ from app import schemas
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, FastAPI, HTTPException, status, Request
-from .deps import get_user_totps, get_totp_from_reqhash
+from .deps import get_user_from_reqhash, get_user_from_hash
+from . import ex
 
 import logging as lg
 from logfunc import logf
 
+_db.Base.metadata.create_all(bind=_db.engine)
 
 app = FastAPI()
 
@@ -23,62 +25,95 @@ async def index_status():
     return {"status": "ok"}
 
 
-@app.post('/totp', response_model=schemas.TOTP)
+@app.post('/totps', response_model=schemas.TOTPCreateOut)
 async def create_totp(
-    new_totp: schemas.TOTP, db: Session = Depends(get_db)
+    new_totp: schemas.TOTPIn, request: Request, db: Session = Depends(get_db)
 ) -> schemas.TOTP:
-    lg.info(f"new_totp: {new_totp}")
+    u = get_user_from_reqhash(request, must_exist=False, db=db)
 
-    lg.info(f"creating new_totp: {new_totp}")
-    db_totp = models.TOTP(**new_totp.model_dump())
-    db.add(db_totp)
-    db.commit()
-    db.refresh(db_totp)
+    user_created = False
+    if u is None:
+        lg.info('No user found for given uhash header, creating...')
+        u = models.User(uhash=request.headers.get('X-User-Hash'))
+        db.add(u)
+        db.commit()
+        db.refresh(u)
+        user_created = True
 
-    return db_totp
+    for totp in u.totps:
+        if totp.enc_secret == new_totp.enc_secret:
+            raise ex.TOTPExistsException()
 
-
-@app.get('/totp', response_model=list[schemas.TOTP])
-async def read_totps(
-    user_totps: list[schemas.TOTP] = Depends(get_totp_from_reqhash),
-) -> list[schemas.TOTP]:
-    return user_totps
-
-
-@app.get('/totp/{enc_secret}', response_model=schemas.TOTP)
-async def read_totp(
-    enc_secret: str, user_totps=Depends(get_totp_from_reqhash)
-):
-    print(
-        user_totps, enc_secret, type(user_totps), type(enc_secret), 'zzz' * 100
+    _totp = (
+        db.query(models.TOTP)
+        .filter(
+            models.TOTP.enc_secret == new_totp.enc_secret,
+            models.TOTP.org_name == new_totp.org_name,
+        )
+        .first()
     )
-    totp = None
-    for totp in user_totps:
+
+    if _totp is not None:
+        lg.info('TOTP with enc_secret already exists for another user')
+        _totp.users.append(u)
+        created = False
+    else:
+        lg.info('No other users with TOTP found, creating new TOTP')
+        _totp = models.TOTP(
+            enc_secret=new_totp.enc_secret,
+            org_name=new_totp.org_name,
+            users=[u],
+        )
+        created = True
+
+    db.add(_totp)
+    db.commit()
+
+    return schemas.TOTPCreateOut(
+        enc_secret=_totp.enc_secret,
+        org_name=_totp.org_name,
+        newly_created=created,
+        user_created=user_created,
+    )
+
+
+@app.get('/totps', response_model=list[schemas.TOTPOut])
+async def get_user_totps(
+    u: models.User = Depends(get_user_from_reqhash),
+) -> list[schemas.TOTP]:
+    return u.totps
+
+
+@app.get('/totps/{enc_secret}', response_model=schemas.TOTPOut)
+async def read_totp(
+    enc_secret: str, u: models.User = Depends(get_user_from_reqhash)
+):
+    for totp in u.totps:
         if totp.enc_secret == enc_secret:
-            break
-
-    if totp is None:
-        raise HTTPException(status_code=404, detail="TOTP not found")
-    return totp
+            return totp
+    raise ex.NoTOTPFoundException()
 
 
-@app.delete('/totp/{enc_secret}')
+@app.delete('/totp/{enc_secret}', response_model=schemas.TOTPDeleteOut)
 async def delete_totp(
     enc_secret: str,
-    user_totps=Depends(get_totp_from_reqhash),
+    u: models.User = Depends(get_user_from_reqhash),
     db: Session = Depends(get_db),
 ):
-    del_totp = None
-    for totp in user_totps:
-        if totp.enc_secret == enc_secret:
-            del_totp = totp
-            break
-    if del_totp is None:
-        raise HTTPException(status_code=404, detail="TOTP not found")
+    utotp = next((t for t in u.totps if t.enc_secret == enc_secret), None)
+    if utotp is None:
+        raise ex.NoTOTPFoundException()
+    utotp.users.remove(u)
 
-    db.delete(del_totp)
+    if len(utotp.users) == 0:
+        lg.info('No other users with TOTP found, deleting TOTP')
+        db.delete(utotp)
+        deleted = True
+    else:
+        deleted = False
+
     db.commit()
-    return {"status": "ok"}
+    return schemas.TOTPDeleteOut(deleted_from_db=deleted)
 
 
 @app.get('/openapi.json')

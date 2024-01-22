@@ -1,21 +1,34 @@
-from .models import TOTP
-
+from fastapi import Depends, FastAPI, HTTPException, Request, status
+from logfunc import logf
+from sqlalchemy import select
 from sqlalchemy.orm import Session
-from fastapi import Depends, FastAPI, HTTPException, status, Request
+
 from .db import get_db
+from .models import TOTP, User
+from . import ex
 
 
-def get_user_totps(uhash: str, db: Session = Depends(get_db)) -> list[TOTP]:
-    return list(db.query(TOTP).filter(TOTP.user_hash == uhash).all())
-
-
-def get_totp_from_reqhash(
-    req: Request, db: Session = Depends(get_db)
+@logf()
+def get_user_from_reqhash(
+    req: Request, must_exist: bool = True, db: Session = Depends(get_db)
 ) -> list[TOTP]:
-    print(req.headers, req.headers.get('X-User-Hash', None), '@' * 100)
     uhash = req.headers.get('X-User-Hash', None)
     if uhash is None:
-        raise HTTPException(
-            status_code=401, detail="Missing X-User-Hash header"
-        )
-    return get_user_totps(uhash, db)
+        raise ex.NoUserHashException()
+    return get_user_from_hash(uhash, must_exist=must_exist, db=db)
+
+
+@logf()
+def get_user_from_hash(
+    uhash: str, must_exist: bool = True, db: Session = Depends(get_db)
+) -> list[TOTP]:
+    u = (
+        db.query(User)
+        .select_from(TOTP)
+        .join(User.totps)
+        .filter(User.uhash == uhash)
+        .first()
+    )
+    if u is None and must_exist:
+        raise ex.NoUserFoundException()
+    return u

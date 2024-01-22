@@ -19,5 +19,5 @@ pytest
 pytest-cov
 alembic==1.13.1
 
-pyshared>=1.0.0
+pyshared>=1.1.0
 

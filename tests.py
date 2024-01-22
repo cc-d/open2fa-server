@@ -1,101 +1,152 @@
-import pytest
-from fastapi.testclient import TestClient
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from app.main import app
-from app import db as _db
-from app import config as cfg
-from uuid import uuid4
-from pyshared import ranstr
+import os
 from functools import wraps
 from unittest.mock import patch
+from uuid import uuid4
+
+import pytest
+from fastapi.testclient import TestClient
 from logfunc import logf
+from pyshared import ranstr
+from sqlalchemy import create_engine
+from sqlalchemy.orm import declarative_base, sessionmaker
+
+from app import config as cfg
+from app.main import app
+from app import db as _db
 
 
 def _testuuid():
     return str(uuid4()).replace('-', '')
 
 
-TEST_UID = _testuuid()
-TEST_ORG = 'Test Org'
-TEST_TOTP = 'JBSWY3DPEHPK3PXP'
-# TEST_ENC_SEC = 'gAAAAABlq_ia8qJoDt5weWB_BKoOOrhh-FNQHwyVnV0reVIKGH74chN_PCkdWz3MR_TFOzsBqRGCvcpvHf8-f5lNZwkJxwf83_z8hBgQNoDJdiPXUj427jo='
-TEST_ENC_SEC = ranstr(32)
-TEST_SEC = 'JBSWY3DPEHPK3PXP'
+@pytest.fixture(scope='session')
+def create_db():
+    _db.Base.metadata.create_all(bind=_db.engine)
+    yield
+    _db.Base.metadata.drop_all(bind=_db.engine)
+    if os.path.exists(
+        cfg.SQLITE_DB_PATH and cfg.SQLITE_DB_PATH.endswith('test.db')
+    ):
+        os.remove(cfg.SQLITE_DB_PATH)
 
 
-@pytest.fixture(scope="session")
-def test_engine():
-    engine = create_engine(cfg.TEST_DB_URI)
-    yield engine
-    engine.dispose()
-
-
-@pytest.fixture(scope="function")
-def test_db():
-    # Create the in-memory SQLite database for each test
-    engine = create_engine(cfg.TEST_DB_URI)
-    _db.Base.metadata.create_all(bind=engine)
-
-    yield engine
-
-    _db.Base.metadata.drop_all(bind=engine)
-    engine.dispose()
-
-
-@pytest.fixture(scope="function")
-def client(test_db):
-    with TestClient(
-        app, base_url="http://testserver", headers={'X-User-Hash': TEST_UID}
-    ) as client:
+@pytest.fixture(scope='session')
+def client(create_db):
+    with TestClient(app) as client:
         yield client
 
 
 def test_index_status(client):
-    response = client.get("/")
-    assert response.status_code == 200
-    assert response.json() == {"status": "ok"}
+    r = client.get('/')
+    assert r.status_code == 200
+    assert r.json() == {'status': 'ok'}
 
 
-def test_create_totp(client):
-    response = client.post(
-        "/totp",
-        json={
-            "enc_secret": TEST_ENC_SEC,
-            "user_hash": TEST_UID,
-            "org_name": TEST_ORG,
-        },
+def test_no_user_hash(client):
+    r = client.get('/totps')
+    assert r.status_code == 400
+
+
+def test_no_user_found(client):
+    r = client.get('/totps', headers={'X-User-Hash': _testuuid()})
+    assert r.status_code == 404
+
+
+def test_create_totp_no_org(client):
+    _sec, _uid = ranstr(32), _testuuid()
+    r = client.post(
+        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _sec}
     )
-    print(response.json(), response.status_code, response.text)
-    assert response.status_code == 200
-    data = response.json()
-    assert data["enc_secret"] == TEST_ENC_SEC
-    assert data["user_hash"] == TEST_UID
-    assert data["org_name"] == TEST_ORG
+    assert r.status_code == 200
+    assert r.json()['org_name'] is None
 
 
-def test_read_totps(client):
-    response = client.get("/totp")
-    assert response.status_code == 200
-    totps = response.json()
-    assert isinstance(totps, list)
+def test_user_exists(client):
+    _uid = _testuuid()
+    r = client.post(
+        '/totps',
+        headers={'X-User-Hash': _uid},
+        json={'enc_secret': ranstr(32)},
+    )
+    assert r.status_code == 200
+    assert r.json()['user_created'] == True
+
+    r = client.post(
+        '/totps',
+        headers={'X-User-Hash': _uid},
+        json={'enc_secret': ranstr(32)},
+    )
+    assert r.status_code == 200
+    assert r.json()['user_created'] == False
 
 
-def test_read_totp(client):
-    client.get = logf(level='INFO', use_print=True)(client.get)
+def test_multiple_user_same_totp(client):
+    _sec, _org = ranstr(32), ranstr(32)
+    uids = [_testuuid() for _ in range(2)]
+    for _uuid in uids:
+        r = client.post(
+            '/totps',
+            headers={'X-User-Hash': _uuid},
+            json={'enc_secret': _sec, 'org_name': _org},
+        )
+        assert r.status_code == 200
+        assert r.json()['org_name'] == _org
+        assert r.json()['enc_secret'] == _sec
 
-    response = client.get(f"/totp/{TEST_ENC_SEC}")
-    assert response.status_code == 200
-    totp = response.json()
-    assert totp["enc_secret"] == TEST_ENC_SEC
+        assert r.json()['user_created'] == True
+        if _uuid == uids[0]:
+            assert r.json()['newly_created'] == True
+        else:
+            assert r.json()['newly_created'] == False
+
+
+def test_list_totps(client):
+    _uid = _testuuid()
+    _totps = [ranstr(32) for _ in range(2)]
+    for _totp in _totps:
+        r = client.post(
+            '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
+        )
+    listed_totps = client.get('/totps', headers={'X-User-Hash': _uid}).json()
+    assert len(listed_totps) == len(_totps)
+
+    r = client.get(f'/totps/{_totps[0]}', headers={'X-User-Hash': _uid})
+    assert r.status_code == 200
+    assert r.json()['enc_secret'] == _totps[0]
 
 
 def test_delete_totp(client):
-    response = client.delete(f"/totp/{TEST_ENC_SEC}")
-    assert response.status_code == 200
-    data = response.json()
-    assert data == {"status": "ok"}
+    uids = [_testuuid() for _ in range(2)]
+    totp_sec = ranstr(32)
+    for _uid in uids:
+        r = client.post(
+            '/totps',
+            headers={'X-User-Hash': _uid},
+            json={'enc_secret': totp_sec},
+        )
+    r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uids[0]})
+    assert r.status_code == 200
+    assert r.json()['deleted_from_db'] == False
+    r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uids[1]})
+    assert r.status_code == 200
+    assert r.json()['deleted_from_db'] == True
 
-    # Verify that the TOTP is deleted
-    response = client.get(f"/totp/{TEST_ENC_SEC}")
-    assert response.status_code == 404
+
+def test_totp_create_exists(client):
+    _uid, _totp = _testuuid(), ranstr(32)
+    r = client.post(
+        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
+    )
+    r = client.post(
+        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
+    )
+    assert r.status_code == 409
+
+
+def test_no_totp_for_user_with_enc_secret(client):
+    _uid, _totp = _testuuid(), ranstr(32)
+    r = client.post(
+        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
+    )
+    r = client.get(f'/totps/{ranstr(32)}', headers={'X-User-Hash': _uid})
+    assert r.status_code == 404

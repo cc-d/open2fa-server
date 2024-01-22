@@ -1,5 +1,8 @@
 import os
+from pyshared import typed_evar
 
-DB_URI = os.getenv("DB_URI", "sqlite:///sqlite.db")
-TEST_DB_URI = os.getenv("TEST_DB_URI", "sqlite:///:memory:")
-SQLALCHEMY_DATABASE_URL = DB_URI
+TESTING = typed_evar("TESTING", False)
+DIR_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SQLITE_DB_PATH = os.path.join(DIR_ROOT, 'test.db' if TESTING else 'sqlite.db')
+
+DB_URI = f'sqlite:///{SQLITE_DB_PATH}'
