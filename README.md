@@ -21,18 +21,18 @@ tests.py::test_totp_create_exists PASSED
 tests.py::test_no_totp_for_user_with_enc_secret PASSED
 
 ---------- coverage: platform darwin, python 3.11.7-final-0 ----------
-Name              Stmts   Miss  Cover   Missing
+Name    Stmts   Miss  Cover   Missing
 -----------------------------------------------
-app/__init__.py       0      0   100%
-app/config.py         6      0   100%
-app/db.py            14      0   100%
-app/deps.py          19      0   100%
-app/ex.py            13      0   100%
-app/main.py          69      2    97%   105, 121
-app/models.py        18      1    94%   47
-app/schemas.py       27      2    93%   13, 28
+app/__init__.py  0 0   100%
+app/config.py    6 0   100%
+app/db.py  14 0   100%
+app/deps.py19 0   100%
+app/ex.py  13 0   100%
+app/main.py69 2    97%   105, 121
+app/models.py   18 1    94%   47
+app/schemas.py  27 2    93%   13, 28
 -----------------------------------------------
-TOTAL               166      5    97%
+TOTAL166 5    97%
 
 ```
 
@@ -71,43 +71,18 @@ In the provided code, the security mechanisms are described as follows:
    - `gen_user_hash` is used to create user hashes based on user IDs.
    - `gen_uuid` is used to generate unique identifiers (UUIDs).
 
-These mechanisms ensure that TOTP secrets are stored securely and can be decrypted when needed, using an encryption key associated with a specific user or organization.
+**Security Workflow:**
 
-## High-Level Overview of Security Scheme
+```
+[CLIENT DEVICE]
 
-Here's a revised high-level overview of how the system works with a focus on security:
+1. cli init -> generate uuid -> create UUID Hash
+2. encrypt TOTP Secrets
+3. send secure request to server
 
-1. **UUID and UUID Hash Creation on the Client (User's Device):**
+[AFTER CLIENT SENDS ENCRYPTED TOTP SECRETS TO SERVER]
 
-   - [USER'S DEVICE]
-     |
-     v
-     cli init -> generate uuid -> create UUID Hash
-
-2. **Client-Side Encryption of User-Saved TOTP Secrets:**
-
-   - [USER'S DEVICE]
-     |
-     v
-     encrypt TOTP Secrets
-
-3. **Secure Remote Synchronization Request from Client:**
-
-   - [USER'S DEVICE]
-     |
-     v
-     send secure request -> retrieve encrypted TOTP Secrets
-
-4. **Server Stores Encrypted TOTP Secrets Using UUID Hash:**
-
-   - [SERVER]
-     |
-     v
-     store encrypted TOTP Secrets
-
-5. **Client's Secure TOTP Secret Decryption:**
-
-   - [USER'S DEVICE]
-     |
-     v
-     decrypt TOTP Secrets -> generate TOTP Code
+4. client identifies using UUID Hash
+5. retrieve encrypted TOTP Secrets from server
+6. decrypt TOTP Secrets -> generate TOTP Code
+```
