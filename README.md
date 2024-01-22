@@ -40,6 +40,16 @@ TOTAL166 5    97%
 
 In the provided code, the security mechanisms are described as follows:
 
+`aes_encrypt` is used for encrypting TOTP secrets before storage.
+
+`aes_decrypt` is used for decrypting TOTP secrets when they need to be retrieved.
+
+`gen_user_hash` is used to create truncated sha256 hashes truncated to 32 characters which are used to identify users
+
+`gen_uuid` is used to generate unique identifiers (UUIDs).
+
+## How it works
+
 1. **Encryption and Decryption Functions (`aes_encrypt` and `aes_decrypt`):**
 
    - `aes_encrypt` function is used to encrypt TOTP secrets. It takes a TOTP secret (`data`) and an encryption key (`enc_key`) as input.
@@ -64,24 +74,15 @@ In the provided code, the security mechanisms are described as follows:
    - This function generates a random UUID and returns it as a base58-encoded string.
    - It can be used for creating unique identifiers.
 
-4. **Overall Usage:**
-   - `aes_encrypt` is used for encrypting TOTP secrets before storage.
-   - `aes_decrypt` is used for decrypting TOTP secrets when they need to be retrieved.
-   - `gen_user_hash` is used to create truncated sha256 hashes truncated to 32 characters which are used to identify users
-   - `gen_uuid` is used to generate unique identifiers (UUIDs).
+4. **Client Initialization (`open2fa init`):**
 
-**Security Workflow:**
+   - This function is used to initialize a client with the server.
+   - It generates a random UUID and uses it as the encryption key for the client, creating it if it doesn't exist. The encryption key is stored locally in `~/.open2fa/open2fa.id` by default.
+   - All totp secrets are encrypted using this key before being sent to the server.
 
-```
-[CLIENT DEVICE]
+5. **Client Retrieves TOTP secrets from the server**
 
-1. cli init -> generate uuid -> create UUID Hash
-2. encrypt TOTP Secrets
-3. send secure request to server
-
-[AFTER CLIENT SENDS ENCRYPTED TOTP SECRETS TO SERVER]
-
-4. client identifies using UUID Hash
-5. retrieve encrypted TOTP Secrets from server
-6. decrypt TOTP Secrets -> generate TOTP Code
-```
+   - A request is sent to the server to retrieve all TOTP secrets for the user using the uuid sha256 truncated hash.
+   - The server returns a list of encrypted TOTP secrets.
+   - The client decrypts the TOTP secrets using the locally stored uuid encryption key.
+   - The user can then use these TOTP secrets to generate one-time passwords.
