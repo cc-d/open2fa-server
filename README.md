@@ -100,8 +100,6 @@ open2fa cli init -> generate uuid -> store uuid locally -> keys are encrypted us
 
    - The client uses its locally stored UUID-based encryption key to decrypt the TOTP secrets.
 
-   - **Security Measures:** User identification is achieved through the UUID or user ID, without sharing the UUID with the server, enhancing security and confidentiality.
-
 4. **Generating One-Time Passwords (TOTPs):**
 
    - With the decrypted TOTP secrets, the client can now generate one-time passwords (TOTPs) as needed.
