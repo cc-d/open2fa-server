@@ -61,7 +61,13 @@ open2fa installed -> add/remove/etc keys locally -> generate codes locally
 SERVER FLOW
 
 ```
-open2fa cli init -> generate uuid -> store uuid locally -> keys are encrypted using uuid -> keys are synced to server -> keys are retrieved from server by another client -> keys are decrypted using uuid -> codes are generated locally
+open2fa cli init -> generate uuid -> store uuid locally ->
+
+keys are encrypted using uuid -> keys are synced to server ->
+
+keys are retrieved from server by another client ->
+
+keys are decrypted using uuid -> codes are generated locally
 ```
 
 1. **Client Initialization (`open2fa init`):**
