@@ -54,7 +54,6 @@ async def create_totp(
         _org = None if _totp.org_name is None else _totp.org_name
         _totp = models.TOTP(enc_secret=_totp.enc_secret, org_name=_org, user=u)
         db.add(_totp)
-        db.commit()
 
         new_totps.append(
             schemas.TOTPOut(
