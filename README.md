@@ -35,3 +35,24 @@ app/schemas.py       27      2    93%   13, 28
 TOTAL               166      5    97%
 
 ```
+
+# how it works
+
+The generate_base58_uuid() function generates a random UUID, converts it to bytes, and then encodes it as a Base58 string. This UUID is used as the encryption key.
+Encryption:
+
+The encrypt function takes the data (e.g., a secret message) and the encryption key.
+It first pads the data to ensure it's a multiple of the block size (128 bits or 16 bytes for AES).
+Then, it encodes the encryption key from Base58 to bytes.
+It creates an AES cipher object with the encryption key and the ECB mode (Electronic Codebook mode).
+The data is encrypted using the cipher object.
+The resulting ciphertext is Base64-encoded to ensure it can be stored as a string.
+Decryption:
+
+The decrypt function takes the encrypted string and the encryption key.
+It decodes the encryption key from Base58 to bytes.
+The Base64-encoded ciphertext is decoded back to bytes.
+An AES cipher object is created using the encryption key and ECB mode.
+The ciphertext is decrypted using the cipher object.
+The decrypted data is unpadded to remove any padding added during encryption.
+Finally, the decrypted data is decoded back to a string.
