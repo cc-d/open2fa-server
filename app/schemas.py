@@ -1,5 +1,5 @@
 from pydantic import BaseModel, ConfigDict
-from typing import Optional as Opt
+from typing import Optional as Opt, List, Union
 from pyshared import truncstr, default_repr
 
 
@@ -32,16 +32,19 @@ class TOTP(TOTPCommon):
         )
 
 
-class TOTPIn(TOTPCommon):
-    pass
+class TOTPIn(BaseModel):
+    totps: List[TOTPCommon]
 
 
 class TOTPOut(TOTPCommon):
-    pass
+    org_name: Union[str, None] = None
+    enc_secret: str
+    uhash: str
 
 
-class TOTPCreateOut(TOTPCommon):
+class TOTPCreateOut(BaseModel):
     user_created: bool
+    totps: list[TOTPCommon]
 
 
 class TOTPDeleteOut(BaseModel):

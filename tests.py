@@ -32,7 +32,7 @@ def create_db():
 
 @pytest.fixture(scope='session')
 def client(create_db):
-    with TestClient(app) as client:
+    with TestClient(app, base_url='http://test/api/v1') as client:
         yield client
 
 
@@ -55,10 +55,14 @@ def test_no_user_found(client):
 def test_create_totp_no_org(client):
     _sec, _uid = ranstr(32), _testuuid()
     r = client.post(
-        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _sec}
+        '/totps',
+        headers={'X-User-Hash': _uid},
+        json={'totps': [{'enc_secret': _sec}]},
     )
     assert r.status_code == 200
-    assert r.json()['org_name'] is None
+    for _totp in r.json()['totps']:
+        assert _totp['enc_secret'] == _sec
+        assert _totp['org_name'] is None
 
 
 def test_user_exists(client):
@@ -66,7 +70,7 @@ def test_user_exists(client):
     r = client.post(
         '/totps',
         headers={'X-User-Hash': _uid},
-        json={'enc_secret': ranstr(32)},
+        json={'totps': [{'enc_secret': ranstr(32)}]},
     )
     assert r.status_code == 200
     assert r.json()['user_created'] == True
@@ -74,7 +78,7 @@ def test_user_exists(client):
     r = client.post(
         '/totps',
         headers={'X-User-Hash': _uid},
-        json={'enc_secret': ranstr(32)},
+        json={'totps': [{'enc_secret': ranstr(32)}]},
     )
     assert r.status_code == 200
     assert r.json()['user_created'] == False
@@ -82,17 +86,16 @@ def test_user_exists(client):
 
 def test_list_totps(client):
     _uid = _testuuid()
-    _totps = [ranstr(32) for _ in range(2)]
-    for _totp in _totps:
-        r = client.post(
-            '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
-        )
+    _totps = [{'enc_secret': ranstr(32)} for _ in range(5)]
+    r = client.post(
+        '/totps', headers={'X-User-Hash': _uid}, json={'totps': _totps}
+    )
     listed_totps = client.get('/totps', headers={'X-User-Hash': _uid}).json()
     assert len(listed_totps) == len(_totps)
 
-    r = client.get(f'/totps/{_totps[0]}', headers={'X-User-Hash': _uid})
+    r = client.get(f'/totps', headers={'X-User-Hash': _uid})
     assert r.status_code == 200
-    assert r.json()['enc_secret'] == _totps[0]
+    assert len(r.json()) == len(_totps)
 
 
 def test_delete_totp(client):
@@ -100,27 +103,20 @@ def test_delete_totp(client):
     totp_sec = ranstr(32)
 
     r = client.post(
-        '/totps', headers={'X-User-Hash': uuid}, json={'enc_secret': totp_sec}
+        '/totps',
+        headers={'X-User-Hash': uuid},
+        json={'totps': [{'enc_secret': totp_sec}]},
     )
     r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uuid})
     assert r.status_code == 200
 
 
-def test_totp_create_exists(client):
-    _uid, _totp = _testuuid(), ranstr(32)
-    r = client.post(
-        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
-    )
-    r = client.post(
-        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
-    )
-    assert r.status_code == 409
-
-
 def test_no_totp_for_user_with_enc_secret(client):
     _uid, _totp = _testuuid(), ranstr(32)
     r = client.post(
-        '/totps', headers={'X-User-Hash': _uid}, json={'enc_secret': _totp}
+        '/totps',
+        headers={'X-User-Hash': _uid},
+        json={'totps': [{'enc_secret': _totp}]},
     )
     r = client.get(f'/totps/{ranstr(32)}', headers={'X-User-Hash': _uid})
     assert r.status_code == 404

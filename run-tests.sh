@@ -1,1 +1,1 @@
-TESTING=True pytest -svvv --cov=app --tb=long --log-level=DEBUG --cov-report=term-missing tests.py
+TESTING=True pytest -sxvvv --cov=app --tb=long --log-level=DEBUG --cov-report=term-missing tests.py
