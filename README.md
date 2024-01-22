@@ -105,15 +105,8 @@ Understood, if encryption also happens on the client, and the server never sees 
 
    - The client's device uses the UUID Hash as the decryption key to decrypt the received TOTP secrets.
 
-7. **Secure TOTP Token Synchronization:**
-
-   - The client securely stores the decrypted TOTP secrets for later use.
-
-8. **TOTP Code Generation on the Client:**
+7. **TOTP Code Generation on the Client:**
 
    - When the client needs to use a TOTP code for authentication or other purposes, it generates the TOTP code locally using the stored and decrypted TOTP secrets.
-
-9. **Authentication or TOTP Usage on the Client:**
-   - The client uses the locally stored TOTP secrets to generate TOTP codes for authentication or any other relevant operation.
 
 In this updated workflow, the encryption of TOTP secrets also happens on the client, and the server never has access to the actual UUID. The server operates based on the UUID Hash for security, ensuring that it cannot identify users by their UUID, enhancing privacy and security.
