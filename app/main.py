@@ -44,27 +44,11 @@ async def create_totp(
         if totp.enc_secret == new_totp.enc_secret:
             raise ex.TOTPExistsException()
 
-    _totp = (
-        db.query(models.TOTP)
-        .filter(
-            models.TOTP.enc_secret == new_totp.enc_secret,
-            models.TOTP.org_name == new_totp.org_name,
-        )
-        .first()
+    _totp = models.TOTP(
+        enc_secret=new_totp.enc_secret,
+        org_name=new_totp.org_name,
+        uhash=u.uhash,
     )
-
-    if _totp is not None:
-        lg.info('TOTP with enc_secret already exists for another user')
-        _totp.users.append(u)
-        created = False
-    else:
-        lg.info('No other users with TOTP found, creating new TOTP')
-        _totp = models.TOTP(
-            enc_secret=new_totp.enc_secret,
-            org_name=new_totp.org_name,
-            users=[u],
-        )
-        created = True
 
     db.add(_totp)
     db.commit()
@@ -72,7 +56,6 @@ async def create_totp(
     return schemas.TOTPCreateOut(
         enc_secret=_totp.enc_secret,
         org_name=_totp.org_name,
-        newly_created=created,
         user_created=user_created,
     )
 
@@ -103,17 +86,9 @@ async def delete_totp(
     utotp = next((t for t in u.totps if t.enc_secret == enc_secret), None)
     if utotp is None:
         raise ex.NoTOTPFoundException()
-    utotp.users.remove(u)
-
-    if len(utotp.users) == 0:
-        lg.info('No other users with TOTP found, deleting TOTP')
-        db.delete(utotp)
-        deleted = True
-    else:
-        deleted = False
-
+    u.totps.remove(utotp)
     db.commit()
-    return schemas.TOTPDeleteOut(deleted_from_db=deleted)
+    return schemas.TOTPDeleteOut()
 
 
 @app.get('/openapi.json')

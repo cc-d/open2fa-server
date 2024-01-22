@@ -80,26 +80,6 @@ def test_user_exists(client):
     assert r.json()['user_created'] == False
 
 
-def test_multiple_user_same_totp(client):
-    _sec, _org = ranstr(32), ranstr(32)
-    uids = [_testuuid() for _ in range(2)]
-    for _uuid in uids:
-        r = client.post(
-            '/totps',
-            headers={'X-User-Hash': _uuid},
-            json={'enc_secret': _sec, 'org_name': _org},
-        )
-        assert r.status_code == 200
-        assert r.json()['org_name'] == _org
-        assert r.json()['enc_secret'] == _sec
-
-        assert r.json()['user_created'] == True
-        if _uuid == uids[0]:
-            assert r.json()['newly_created'] == True
-        else:
-            assert r.json()['newly_created'] == False
-
-
 def test_list_totps(client):
     _uid = _testuuid()
     _totps = [ranstr(32) for _ in range(2)]
@@ -116,20 +96,14 @@ def test_list_totps(client):
 
 
 def test_delete_totp(client):
-    uids = [_testuuid() for _ in range(2)]
+    uuid = _testuuid()
     totp_sec = ranstr(32)
-    for _uid in uids:
-        r = client.post(
-            '/totps',
-            headers={'X-User-Hash': _uid},
-            json={'enc_secret': totp_sec},
-        )
-    r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uids[0]})
+
+    r = client.post(
+        '/totps', headers={'X-User-Hash': uuid}, json={'enc_secret': totp_sec}
+    )
+    r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uuid})
     assert r.status_code == 200
-    assert r.json()['deleted_from_db'] == False
-    r = client.delete(f'/totp/{totp_sec}', headers={'X-User-Hash': uids[1]})
-    assert r.status_code == 200
-    assert r.json()['deleted_from_db'] == True
 
 
 def test_totp_create_exists(client):

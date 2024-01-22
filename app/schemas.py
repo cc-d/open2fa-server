@@ -20,7 +20,7 @@ class TOTPCommon(BaseModel):
 
 class TOTP(TOTPCommon):
     id: int
-    users: list[User]
+    users: User
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -41,9 +41,8 @@ class TOTPOut(TOTPCommon):
 
 
 class TOTPCreateOut(TOTPCommon):
-    newly_created: bool
     user_created: bool
 
 
 class TOTPDeleteOut(BaseModel):
-    deleted_from_db: bool
+    success: bool = True
