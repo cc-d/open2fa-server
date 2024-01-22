@@ -50,39 +50,64 @@ In the provided code, the security mechanisms are described as follows:
 
 ## How it works
 
-1. **Encryption and Decryption Functions (`aes_encrypt` and `aes_decrypt`):**
+**THE UUID IS NEVER SENT TO THE SERVER, IT IS ONLY STORED LOCALLY**
 
-   - `aes_encrypt` function is used to encrypt TOTP secrets. It takes a TOTP secret (`data`) and an encryption key (`enc_key`) as input.
-   - It performs PKCS7 padding on the input data.
-   - An AES cipher is created using the encryption key and ECB mode.
-   - The padded data is encrypted using this cipher.
-   - Finally, the encrypted data is base58-encoded and returned as a string.
-   - `aes_decrypt` function is used to decrypt TOTP secrets. It takes an encrypted TOTP secret (`enc_data`) and the encryption key (`enc_key`) as input.
-   - It decodes the base58-encoded encrypted data.
-   - An AES cipher is created using the encryption key and ECB mode.
-   - The encrypted data is decrypted using this cipher.
-   - PKCS7 padding is removed from the decrypted data.
-   - The decrypted data is returned as a string.
+LOCAL FLOW
 
-2. **User Hash Generation (`gen_user_hash`):**
+```
+open2fa installed -> add/remove/etc keys locally -> generate codes locally
+```
 
-   - This function generates a 32-character SHA256 hash from a base58-encoded user ID (`b58_uid`).
-   - The hash is used to uniquely identify users in the system.
+SERVER FLOW
 
-3. **UUID Generation (`gen_uuid`):**
+```
+open2fa cli init -> generate uuid -> store uuid locally -> keys are encrypted using uuid -> keys are synced to server -> keys are retrieved from server by another client -> keys are decrypted using uuid -> codes are generated locally
+```
 
-   - This function generates a random UUID and returns it as a base58-encoded string.
-   - It can be used for creating unique identifiers.
+1. **Client Initialization (`open2fa init`):**
 
-4. **Client Initialization (`open2fa init`):**
+   - When a client initializes with the `open2fa` server, it follows these steps:
 
-   - This function is used to initialize a client with the server.
-   - It generates a random UUID and uses it as the encryption key for the client, creating it if it doesn't exist. The encryption key is stored locally in `~/.open2fa/open2fa.id` by default.
-   - All totp secrets are encrypted using this key before being sent to the server.
+     a. The client generates a random UUID using the `gen_uuid` function.
 
-5. **Client Retrieves TOTP secrets from the server**
+     b. This UUID serves as the encryption key for the client's TOTP secrets.
 
-   - A request is sent to the server to retrieve all TOTP secrets for the user using the uuid sha256 truncated hash.
-   - The server returns a list of encrypted TOTP secrets.
-   - The client decrypts the TOTP secrets using the locally stored uuid encryption key.
-   - The user can then use these TOTP secrets to generate one-time passwords.
+     c. If the key doesn't already exist, it is created and stored locally (e.g., in `~/.open2fa/open2fa.id`).
+
+2. **Storing TOTP Secrets on the Server:**
+
+   - To add a TOTP secret, the client performs the following steps:
+
+     a. The user enters a TOTP secret into the client application.
+
+     b. The client encrypts this TOTP secret using the UUID-based encryption key (created during initialization).
+
+     c. The client sends the encrypted TOTP secret to the `open2fa` server for storage, associating it with the user's UUID.
+
+     d. The server stores the encrypted TOTP secret, linked to the user's UUID.
+
+3. **Retrieving TOTP Secrets from the Server:**
+
+   - When the user wants to retrieve their TOTP secrets for generating one-time passwords, the following happens:
+
+   - The client sends a request to the server, specifying the user's UUID (generated during initialization) or a base58-encoded user ID.
+
+   - The server identifies the user based on the provided UUID or user ID.
+
+   - The server retrieves the encrypted TOTP secrets associated with the user.
+
+   - The server returns the list of encrypted TOTP secrets to the client.
+
+   - The client uses its locally stored UUID-based encryption key to decrypt the TOTP secrets.
+
+   - **Security Measures:**
+
+     - User identification is achieved through the UUID or user ID, without sharing the UUID with the server, enhancing security and confidentiality.
+
+4. **Generating One-Time Passwords (TOTPs):**
+
+   - With the decrypted TOTP secrets, the client can now generate one-time passwords (TOTPs) as needed.
+
+   - The client uses the decrypted TOTP secrets to calculate TOTP values based on the current time.
+
+   - These TOTP values are used for two-factor authentication when needed, typically by entering them along with the username and password for a service.
