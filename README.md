@@ -68,7 +68,7 @@ In the provided code, the security mechanisms are described as follows:
 4. **Overall Usage:**
    - `aes_encrypt` is used for encrypting TOTP secrets before storage.
    - `aes_decrypt` is used for decrypting TOTP secrets when they need to be retrieved.
-   - `gen_user_hash` is used to create user hashes based on user IDs.
+   - `gen_user_hash` is used to create truncated sha256 hashes truncated to 32 characters which are used to identify users
    - `gen_uuid` is used to generate unique identifiers (UUIDs).
 
 **Security Workflow:**
