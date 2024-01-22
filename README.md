@@ -47,7 +47,6 @@ In the provided code, the security mechanisms are described as follows:
    - An AES cipher is created using the encryption key and ECB mode.
    - The padded data is encrypted using this cipher.
    - Finally, the encrypted data is base58-encoded and returned as a string.
-
    - `aes_decrypt` function is used to decrypt TOTP secrets. It takes an encrypted TOTP secret (`enc_data`) and the encryption key (`enc_key`) as input.
    - It decodes the base58-encoded encrypted data.
    - An AES cipher is created using the encryption key and ECB mode.
