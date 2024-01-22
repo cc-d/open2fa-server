@@ -36,7 +36,7 @@ TOTAL               166      5    97%
 
 ```
 
-# how it works
+# Security
 
 Here's an explanation of how the hash/secret mechanisms work in the provided code:
 
@@ -73,7 +73,7 @@ Here's an explanation of how the hash/secret mechanisms work in the provided cod
 
 These mechanisms ensure that TOTP secrets are stored securely and can be decrypted when needed, using an encryption key associated with a specific user or organization.
 
-# flow
+## High-Level Overview of security scheme
 
 Understood, if encryption also happens on the client, and the server never sees the UUID, here's a revised high-level overview of how the system works:
 
