@@ -45,7 +45,6 @@
       .base58-uhash {
         color: lightgreen;
       }
-
     </style>
 
     <!-- Custom Scripts -->
@@ -62,7 +61,7 @@
             <a href="https://github.com/cc-d/open2fa-server">GitHub (server)</a>
           </li>
           <li><a href="https://github.com/cc-d/open2fa">GitHub (cli)</a></li>
-          <li><a href="api/openapi.json">api</a></li>
+          <li><a href="/api/v1/openapi.json">api</a></li>
         </ul>
       </nav>
     </header>
@@ -71,7 +70,7 @@
     <main>
       <h1>open2fa: libre 2fa</h1>
       <h2>100% libre two-factor authentication (2FA) app</h2>
-      <br>
+      <br />
 
       <!-- Demo -->
       <div id="demo">
@@ -86,11 +85,14 @@
         <h2>3. User generates a TOTP code from their open2fa client</h2>
         <h2>TOTP Code: <span class="totp-code">123456</span></h2>
         <h2>
-          4. User synchronizes their open2fa client with the server by sending to the remote server:
+          4. User synchronizes their open2fa client with the server by sending
+          to the remote server:
           <ul>
             <li>
               a truncated sha256 hash of their local-only UUID:
-              <span class="enc-uuid">7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45</span>
+              <span class="enc-uuid"
+                >7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45</span
+              >
             </li>
 
             <li>
@@ -102,20 +104,24 @@
           </ul>
         </h2>
         <h2>
-          5. User identifies themselves to the server by sending a base58 encoded version of this UUID hash to the server:
+          5. User identifies themselves to the server by sending a base58
+          encoded version of this UUID hash to the server:
           <ul>
             <li>
               truncated sha256 hash of their local-only UUID:
-              <span class="enc-uuid">7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45</span>
-              </li>
-              <li>
+              <span class="enc-uuid"
+                >7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45</span
+              >
+            </li>
+            <li>
               base58 encoded:
               <span class="base58-uhash">GiG4Xz1tmTnG3CVh38raYX</span>
             </li>
           </ul>
         </h2>
         <h2>
-          6. Server shares the TOTP secret with the user by sending the encrypted TOTP codes matching the UUID hash to the user:
+          6. Server shares the TOTP secret with the user by sending the
+          encrypted TOTP codes matching the UUID hash to the user:
           <ul>
             <li>
               encrypted TOTP code:
@@ -126,7 +132,8 @@
           </ul>
         </h2>
         <h2>
-          7. (CLIENT SIDE ONLY) User decrypts the TOTP code using their local-only UUID:
+          7. (CLIENT SIDE ONLY) User decrypts the TOTP code using their
+          local-only UUID:
           <ul>
             <li>
               decrypted TOTP secret:
@@ -135,13 +142,15 @@
           </ul>
         </h2>
         <h2>
-          8. (CLIENT SIDE ONLY) User generates a TOTP code from their open2fa client:
+          8. (CLIENT SIDE ONLY) User generates a TOTP code from their open2fa
+          client:
           <ul>
             <li>
               TOTP code:
               <span class="totp-code">123456</span>
             </li>
           </ul>
+        </h2>
       </div>
     </main>
   </body>

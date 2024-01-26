@@ -101,9 +101,7 @@ async def delete_totp(
 
 @router.get('/openapi.json')
 async def get_openapi():
-    return app.openapi(
-        title="API documentation", version="1.0.0", routes=app.routes
-    )
+    return app.openapi()
 
 
 app.include_router(router)
