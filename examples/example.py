@@ -11,6 +11,8 @@ secret = 'I65VU7K5ZQL7WB4E'
 # Convert base58 UUID to bytes
 key_bytes = b58decode(base58_uuid)
 
+print(key_bytes, 'key_bytes', type(key_bytes), len(key_bytes), sep=' || ')
+
 key_b64 = urlsafe_b64encode(key_bytes.hex().encode())
 print(key_b64, 'key_b64', type(key_b64), 'hex', key_bytes.hex(), sep=' || ')
 

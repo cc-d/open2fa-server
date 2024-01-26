@@ -17,3 +17,5 @@ var token = new fernet.Token({
 });
 
 console.log(token.decode());
+
+

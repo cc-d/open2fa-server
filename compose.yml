@@ -1,0 +1,19 @@
+version: '3.8'
+services:
+  fastapi:
+    build:
+      context: ./
+    ports:
+      - '8000:8000'
+    environment:
+      - DATABASE_URL=sqlite:///sqlite.db # Modify as needed for your database
+
+  nginx:
+    build:
+      context: ./nginx # Set the build context to the nginx/ directory
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx/html:/var/www/html
+    depends_on:
+      - fastapi
