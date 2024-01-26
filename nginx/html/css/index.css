@@ -1,0 +1,101 @@
+/* Custom color palette */
+:root {
+  --bg-dark: #2d2d2d;
+  --text-white: #dcdcdc;
+  --bg-header: #1e1e1e;
+  --text-logo: #89ddff;
+  --text-title: #ffcb6b;
+  --text-subtitle: #c3e88d;
+  --bg-content: #333842;
+  --text-highlight: #82aaff;
+  --text-normal: #b2ccd6;
+  --uuid-color: #f07178;
+  --secret-color: #c792ea;
+  --code-generated-color: #82aaff;
+  --hash-color: #ffcb6b;
+  --encrypted-color: #a1efe4;
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-white);
+}
+
+.bg-header {
+  background-color: var(--bg-header);
+}
+
+.text-logo {
+  color: var(--text-logo);
+}
+
+.text-title {
+  color: var(--text-title);
+}
+
+.text-subtitle {
+  color: var(--text-subtitle);
+}
+
+.how-it-works {
+  background-color: var(--bg-content);
+  color: var(--text-normal);
+}
+
+.text-highlight {
+  color: var(--text-highlight);
+}
+
+.uuid, .secret, .code-generated, .hash, .encrypted {
+  font-weight: bold;
+}
+
+.uuid { color: var(--uuid-color); }
+.secret { color: var(--secret-color); }
+.code-generated { color: var(--code-generated-color); }
+.hash { color: var(--hash-color); }
+.encrypted { color: var(--encrypted-color); }
+
+/* Additional styles */
+.rounded {
+  border-radius: 0.25rem;
+}
+
+
+
+.text-normal { color: var(--text-white); margin-left: 20px; }
+.text-highlight { color: var(--text-title); }
+
+.uuid { color: var(--uuid-color); }
+.secret { color: var(--secret-color); }
+.code-generated { color: var(--code-generated-color); }
+.hash { color: var(--hash-color); }
+.encrypted { color: var(--encrypted-color); }
+
+/* Spacing for list items and nested paragraphs */
+.list-group-item {
+  background-color: var(--bg-dark);
+  margin-bottom: 10px;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.list-group-item p {
+  padding-left: 20px;
+}
+
+.list-group-item code {
+  background-color: transparent;
+  padding-left: 20px;
+}
+
+/* Additional styles for visual hierarchy */
+.list-group-item .text-highlight {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.list-group-item code {
+  display: block;
+  margin-top: 5px;
+}

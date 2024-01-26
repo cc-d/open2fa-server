@@ -31,3 +31,24 @@ print('encrypted_secret', encrypted_secret)
 decrypted_secret = fernet_key.decrypt(encrypted_secret)
 
 print('decrypted_secret', decrypted_secret)
+
+
+'''
+
+        // Create a Fernet instance
+        var f = new fernet();
+
+        // Replace 'SECRET_KEY_BASE64' with your actual secret key in Base64 format
+        var secretKeyBase64 = 'NjkyYTNlNmI0YmQ0NDAwYmFhMmI4MjYxNjk1YjVmZmI=';
+
+        // Set the secret key using fernet.setSecret
+        f.setSecret(secretKeyBase64);
+
+        let msg = f.encryptMessage('my secret message', f.secret, f.iv)
+
+        console.log(msg.hex())
+
+        let dec = f.decryptMessage(msg, f.secret, f.iv)
+
+        console.log(dec)
+        '''
