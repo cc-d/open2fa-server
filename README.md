@@ -70,4 +70,6 @@ keys are retrieved from server by another client ->
 keys are decrypted using uuid -> codes are generated locally
 ```
 
-See: [https://github.com/cc-d/open2fa-server/nginx/html/index.html](https://github.com/cc-d/open2fa-server/nginx/html/index.html)
+## See sync.png for a visual representation of the flow
+
+![Sync](sync.png)
