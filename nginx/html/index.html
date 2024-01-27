@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <!-- meta -->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
@@ -8,93 +9,96 @@
       content="Open source two-factor authentication (2FA) app."
     />
     <meta name="author" content="Cary Carter" />
+
     <title>open2fa: Libre 2FA</title>
+    <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />
-    <link rel="stylesheet" href="css/custom.css" />
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/index.css" />
   </head>
   <body class="bg-dark text-white">
-    <header class="navbar navbar-expand-lg navbar-dark bg-header">
+    <header class="navbar navbar-dark">
       <div class="container-fluid">
         <a class="navbar-brand mb-0 h1 text-logo" href="#">open2fa</a>
       </div>
     </header>
+    <div class="bg-dark p-3 text-light" id="how-sync-works">
+      <h3>How remote synchronization works:</h3>
+      <ol>
+        <li>
+          User is assigned a UUID when initializing open2fa client:
+          <span class="user-uuid">692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span>
+        </li>
+        <li>
+          User adds a new TOTP secret to their open2fa client:
+          <span class="totp-sec">I65VU7K5ZQL7WB4E</span>
+        </li>
+        <li>
+          User generates a TOTP code from their open2fa client:
 
-    <section id="how-it-works">
-      <h2 class="text-light bg-primary p-2">open2fa: Libre 2fa</h2>
-      <p class="text-light bg-secondary p-2">
-        100% Libre two-factor authentication (2FA) app
-      </p>
-      <div class="bg-dark p-3 text-light">
-        <h3 class="text-warning">How remote synchronization works:</h3>
-        <ol class="steps">
-          <li>
-            <span class="description"
-              >User is assigned a UUID when initializing open2fa client:</span
-            >
-            <span class="text-primary user-uuid"
-              >692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span
-            >
-          </li>
-          <li>
-            <span class="description"
-              >User adds a new TOTP secret to their open2fa client:</span
-            >
-            <span class="text-info">I65VU7K5ZQL7WB4E</span>
-          </li>
-          <li>
-            <span class="description"
-              >User generates a TOTP code from their open2fa client:</span
-            >
-            <span class="text-success">123456</span>
-          </li>
-          <li>
-            <span class="description"
-              >User synchronizes their open2fa client with the server by sending
-              a truncated sha256 hash of their local-only UUID:
+          <span class="totp-gen-sec">123456</span>
+        </li>
+        <li>
+          User synchronizes their open2fa client with the server by sending a
+          truncated sha256 hash of their local-only UUID:
+          <span class="uuid-hash">
+            7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45
+          </span>
+        </li>
+        <li>
+          Encrypted TOTP code:
+          <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+        </li>
+        <li>
+          User identifies themselves to the server by sending a base58 encoded
+          version of this UUID hash:
 
-              <span class="text-warning hash"
-                >7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45</span
-              >
-            </span>
-          </li>
-          <li>
-            <span>Encrypted TOTP code:</span>
-            <span class="encrypted text-danger"
-              >692a3e6b4bd4400baa2b8261695b5ffb</span
-            >
-          </li>
-          <li>
-            <span class="description"
-              >User identifies themselves to the server by sending a base58
-              encoded version of this UUID hash:</span
-            >
-            <span class="base58 text-success">GiG4Xz1tmTnG3CVh3raYX</span>
-          </li>
-          <li>
-            <span class="description"
-              >Server shares the TOTP secret with the user by sending the
-              encrypted TOTP codes matching the UUID hash:</span
-            >
-            <span class="encrypted text-danger">692a3e6b4bd4400baa2b8261695b5ffb</span>
-          </li>
-          <li>
-            <span class="description"
-              >User decrypts the TOTP code using their local-only UUID (CLIENT
-              SIDE ONLY):</span
-            >
-            <span class="text-info">I65VU7K5ZQL7WB4E</span>
-          </li>
-          <li>
-            <span class="description"
-              >User generates a TOTP code from their open2fa client (CLIENT SIDE
-              ONLY):</span
-            >
-            <span class="text-danger">123456</span>
-          </li>
-        </ol>
-      </div>
-    </section>
+          <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+        </li>
+        <li>
+          Server shares the TOTP secret with the user by sending the encrypted
+          TOTP codes matching:
+          <ul>
+            <li>
+              Encrypted TOTP secret:
+              <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+            </li>
+            <li>
+              Base58 encoded UUID hash:
+              <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+            </li>
+
+          </ul>
+        </li>
+        <li>
+          User decrypts the TOTP code using their local-only UUID (CLIENT SIDE
+          ONLY):
+          <ul>
+            <li>
+              User Enters Base58 encoded UUID hash:
+              <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+            </li>
+            <li>
+              The following encrypted TOTP secrets are assosiacted with this UUID hash:
+              <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+            </li>
+            <li>
+              The user's base58 LOCALLY STORED NEVER SHARED UUID hash is then used to decrypt the TOTP secret:
+              <span class="totp-sec">I65VU7K5ZQL7WB4E</span>
+            </li>
+            <li>
+              The decrypted TOTP secret is then used to generate a TOTP code:
+              <span class="totp-gen-sec">123456</span>
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </div>
 
     <script src="js/bootstrap.bundle.min.js"></script>
+    <script src="js/base58.js"></script>
+    <script src="js/jquery.min.js"></script>
+    <script src="js/fernetBrowser.js"></script>
+
   </body>
 </html>
