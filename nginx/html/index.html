@@ -27,80 +27,123 @@
         <a class="navbar-brand mb-0 h1 text-logo" href="#">open2fa</a>
       </div>
     </header>
+
+    <!-- How Sync Works -->
     <div class="bg-dark p-3 text-light" id="how-sync-works">
-      <h3>How remote synchronization works:</h3>
+      <h1>How it works:</h1>
+      <h4>Local Client</h4>
       <ol>
-        <li>
-          User is assigned a UUID when initializing open2fa client:
-          <span class="user-uuid">692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span>
-        </li>
         <li>
           User adds a new TOTP secret to their open2fa client:
           <span class="totp-sec">I65VU7K5ZQL7WB4E</span>
         </li>
         <li>
           User generates a TOTP code from their open2fa client:
-
           <span class="totp-gen-sec">123456</span>
         </li>
+      </ol>
+      <h4>Remote Synchronization and 2FA Code Generation (optional)</h4>
+      <ol>
         <li>
-          User synchronizes their open2fa client with the server by sending a
-          truncated sha256 hash of their local-only UUID:
+          User is assigned a UUID when initializing the remote capabilities of
+          the open2fa client:
+          <span class="user-uuid">692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span>
+        </li>
+
+        <li>
+          A sha256 hash of the UUID is generated:
           <span class="uuid-hash">
             7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45
           </span>
         </li>
+
         <li>
-          Encrypted TOTP code:
-          <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+          The 32 bytes of this hash are split into two parts and used for the
+          following purposes:
+          <ul>
+            <li>
+              The first 16 bytes of the hash are used for user identification,
+              when encoded into base58 this is the Open2FA ID:
+              <span class="o2fa-id">GiG4Xz1tmTnG3CVh38raYX</span>
+              This is used to identify the user to the server during api
+              requests, as well as for authentication if generating a TOTP code
+              from the web ui.
+            </li>
+            <li>
+              The remaining 16 bytes of the hash are used for encryption of the
+              TOTP secret when stored on the remote server:
+              <span class="o2fa-enc-secret">GiRVCWuSBPaVM7xfER9h6</span>
+              This should never be shared with the server. If using the webui, a
+              user must provide this value to enable decryption, but it is never
+              sent to the server - any decryption happens exclusively on the
+              client side. This is the major reason the frontend javascript has
+              been kept as simple as possible.
+            </li>
+          </ul>
         </li>
+        <li>
+          The TOTP secret is encrypted using the last 16 bytes of the UUID hash
+          <span class="enc-totp-secret">692a3e6b4bd4400baa2b8261695b5ffb</span>
+        </li>
+
         <li>
           User identifies themselves to the server by sending a base58 encoded
           version of this UUID hash:
-
-          <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+          <span class="o2fa-id">GiG4Xz1tmTnG3CVh3raYX</span>
         </li>
         <li>
-          Server shares the TOTP secret with the user by sending the encrypted
-          TOTP codes matching:
+          Server shares the ENCRYPTED TOTP secrets matching the Open2FA ID
+          provided by the user:
           <ul>
             <li>
-              Encrypted TOTP secret:
-              <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+              <div>
+                Open2FA ID: <span class="o2fa-id">GiG4Xz1tmTnG3CVh3raYX</span>
+              </div>
             </li>
             <li>
-              Base58 encoded UUID hash:
-              <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+              <div>
+                Encrypted TOTP secret:
+                <span class="enc-totp-secret">
+                  692a3e6b4bd4400baa2b8261695b5ffb
+                </span>
+              </div>
             </li>
-
           </ul>
         </li>
         <li>
-          User decrypts the TOTP code using their local-only UUID (CLIENT SIDE
-          ONLY):
+          User decrypts the TOTP code using their locally stored Open2FA
+          encryption secret (the last 16 bytes of the UUID hash):
           <ul>
             <li>
-              User Enters Base58 encoded UUID hash:
-              <span class="b58-uuid">GiG4Xz1tmTnG3CVh3raYX</span>
+              <div>
+                Open2FA encryption secret:
+                <span class="o2fa-enc-secret">GiRVCWuSBPaVM7xfER9h6</span>
+              </div>
             </li>
             <li>
-              The following encrypted TOTP secrets are assosiacted with this UUID hash:
-              <span class="enc-totp-sec"> 692a3e6b4bd4400baa2b8261695b5ffb </span>
+              <div>
+                Encrypted TOTP secret:
+                <span class="enc-totp-secret">
+                  692a3e6b4bd4400baa2b8261695b5ffb
+                </span>
+              </div>
             </li>
             <li>
-              The user's base58 LOCALLY STORED NEVER SHARED UUID hash is then used to decrypt the TOTP secret:
-              <span class="totp-sec">I65VU7K5ZQL7WB4E</span>
-            </li>
-            <li>
-              The decrypted TOTP secret is then used to generate a TOTP code:
-              <span class="totp-gen-sec">123456</span>
+              <div>
+                Decrypted TOTP secret:
+                <span class="totp-sec">I65VU7K5ZQL7WB4E</span>
+              </div>
             </li>
           </ul>
+
+        </li>
+
+
+        <li>
+          The decrypted TOTP secret is then used to generate a TOTP code:
+          <span class="totp-gen-sec">123456</span>
         </li>
       </ol>
     </div>
-
-
-
   </body>
 </html>

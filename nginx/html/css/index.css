@@ -187,12 +187,12 @@
   color: var(--mui-teal);
 }
 
-.enc-totp-sec {
+.enc-totp-secret {
   color: var(--mui-cyan);
 }
 
 .b58-uuid {
-  color: var(--mui-light-blue);
+  color: var(--mui-blue);
   font-weight: bold;
 }
 
@@ -200,5 +200,12 @@
 #how-sync-works > ol > li > ul > li > span {
   display: block;
   font-family: monospace;
+}
 
+.o2fa-id {
+  color: var(--mui-yellow);
+}
+
+.o2fa-enc-secret {
+  color: var(--mui-deep-orange);
 }
