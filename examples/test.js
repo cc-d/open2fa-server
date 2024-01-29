@@ -1,21 +1,60 @@
-//(venv) py3 examples/example.py
-//b'NjkyYTNlNmI0YmQ0NDAwYmFhMmI4MjYxNjk1YjVmZmI=' || key_b64 || <class 'bytes'> || hex || 692a3e6b4bd4400baa2b8261695b5ffb
-//encrypted_secret b'gAAAAABlsw4CI_djjut4RS0rEeJoEZbtT_1sbb_uMMNdbCO-_CXpEgPLbMaPg9bZOLb98ir9L5B5W-apC_PdqXfwEnkHKA_VrSeoq7pAapnlk_VG0pjRq50='
-//decrypted_secret b'I65VU7K5ZQL7WB4E'
-//
-//
-// NjkyYTNlNmI0YmQ0NDAwYmFhMmI4MjYxNjk1YjVmZmI= is passed to fernet.Secret
-//
-// encrypted_secret b'gAAAAABlswvP3Fe-NhwpNJUJ-LIa9XLhsZ83OuuKE81zSiQ7acwg2W1Tu02Z0HNM-ZXeUrRU1GoOm7RxB9bxr3xDloa_92RROWDRX7kYZ3O1GzVmQxnpoh0='
+const ALPHABET = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
+const BASE = BigInt(ALPHABET.length);
 
-var secret = new fernet.Secret("NjkyYTNlNmI0YmQ0NDAwYmFhMmI4MjYxNjk1YjVmZmI=");
+function b58decode(input) {
+    let num = BigInt(0);
+    for (let i = 0; i < input.length; i++) {
+        const charIndex = ALPHABET.indexOf(input[i]);
+        if (charIndex === -1) {
+            throw new Error("Invalid character in Base58 string");
+        }
+        num = num * BASE + BigInt(charIndex);
+    }
 
-var token = new fernet.Token({
-  secret: secret,
-  token: 'gAAAAABlswl5zPpanMkPpRv4cbs364kzGqhwrChW_wO5cLQqAZyUYmUvQ9hTtfrAalIQA0Zb2xgREbJtQTNnnYp10aT1hR7J3k0nZZpfg7jRwAURZJaEUi0=',
-  ttl: 0 // Setting Time To Live to 0 for no expiration check
-});
+    let bytes = [];
+    while (num > 0) {
+        bytes.push(Number(num % BigInt(256)));
+        num = num / BigInt(256);
+    }
+    return new Uint8Array(bytes.reverse()).buffer;
+}
 
-console.log(token.decode());
+// Helper function to convert string to ArrayBuffer
+function str2ab(str) {
+    const buffer = new Uint8Array(str.length);
+    for (let i = 0; i < str.length; i++) {
+        buffer[i] = str.charCodeAt(i);
+    }
+    return buffer;
+}
+// 0123456789abcdef
+const defaultIv = b58decode('6xA5cTR1239iti1EFMiXoT');
 
+async function decryptWithBase58(ciphertextB58, keyB58, iv=b58decode('6xA5cTR1239iti1EFMiXoT')) {
+  const crypto = window.crypto.subtle;
 
+  // Decode the Base58-encoded key and IV
+  const decodedKey = b58decode(keyB58);
+
+  const keyObj = await crypto.importKey(
+      "raw",
+      decodedKey,
+      { name: "AES-CBC" },
+      false,
+      ["decrypt"]
+  );
+
+  const decodedCiphertext = b58decode(ciphertextB58);
+  const decrypted = await crypto.decrypt(
+      {
+          name: "AES-CBC",
+          iv: iv
+      },
+      keyObj,
+      decodedCiphertext
+  );
+
+  return new TextDecoder().decode(decrypted);
+}
+
+decryptWithBase58('4zPNDti4B5XavRZrMmVTVH', '2DmmMnNvjUULrgKbncmmud')
