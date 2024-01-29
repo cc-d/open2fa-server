@@ -99,9 +99,4 @@ async def delete_totp(
     return schemas.TOTPDeleteOut()
 
 
-@router.get('/openapi.json')
-async def get_openapi():
-    return app.openapi()
-
-
 app.include_router(router)

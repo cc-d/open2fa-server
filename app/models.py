@@ -28,7 +28,7 @@ class TOTP(_db.Base):
     enc_secret: Mapped[str] = mapcol(
         Text, index=True, nullable=False, primary_key=True
     )
-    org_name: Mapped[str] = mapcol(
+    name: Mapped[str] = mapcol(
         String(255), nullable=True, default=None, server_default=None
     )
     uhash: Mapped[str] = mapcol(
