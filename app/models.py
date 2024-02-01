@@ -42,5 +42,5 @@ class TOTP(_db.Base):
     def __repr__(self):
         return (
             f"<models.TOTP id={self.id} enc_secret={self.enc_secret} "
-            f"org_name={self.org_name}>"
+            f"name={self.name}>"
         )

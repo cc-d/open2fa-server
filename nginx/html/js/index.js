@@ -28,6 +28,10 @@ function str2ab(str) {
     return buffer;
 }
 
+// While in most cases you would want to use a random IV, we use a constant
+// IV here as the UUID entropy ensures that the same plaintext is never
+// encrypted twice.
+// This is equivalent to b'0123456789abcdef'
 const defaultIv = b58decode('6xA5cTR1239iti1EFMiXoT');
 
 async function decryptWithBase58(ciphertextB58, keyB58, iv=b58decode('6xA5cTR1239iti1EFMiXoT')) {

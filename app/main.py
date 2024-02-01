@@ -51,15 +51,13 @@ async def create_totp(
 
     new_totps = []
     for _totp in new_totp.totps:
-        _org = None if _totp.org_name is None else _totp.org_name
-        _totp = models.TOTP(enc_secret=_totp.enc_secret, org_name=_org, user=u)
+        _org = None if _totp.name is None else _totp.name
+        _totp = models.TOTP(enc_secret=_totp.enc_secret, name=_org, user=u)
         db.add(_totp)
 
         new_totps.append(
             schemas.TOTPOut(
-                enc_secret=_totp.enc_secret,
-                org_name=_totp.org_name,
-                uhash=u.uhash,
+                enc_secret=_totp.enc_secret, name=_totp.name, uhash=u.uhash
             )
         )
 

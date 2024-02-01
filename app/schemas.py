@@ -15,7 +15,7 @@ class User(BaseModel):
 
 class TOTPCommon(BaseModel):
     enc_secret: str
-    org_name: Opt[str] = None
+    name: Opt[str] = None
 
 
 class TOTP(TOTPCommon):
@@ -28,7 +28,7 @@ class TOTP(TOTPCommon):
         return (
             '<schemas.TOTP '
             f'id={self.id} enc_secret={truncstr(self.enc_secret)} '
-            f'org_name={self.org_name}>'
+            f'name={self.name}>'
         )
 
 
@@ -37,7 +37,7 @@ class TOTPIn(BaseModel):
 
 
 class TOTPOut(TOTPCommon):
-    org_name: Union[str, None] = None
+    name: Union[str, None] = None
     enc_secret: str
     uhash: str
 

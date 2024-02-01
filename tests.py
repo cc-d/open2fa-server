@@ -62,7 +62,7 @@ def test_create_totp_no_org(client):
     assert r.status_code == 200
     for _totp in r.json()['totps']:
         assert _totp['enc_secret'] == _sec
-        assert _totp['org_name'] is None
+        assert _totp['name'] is None
 
 
 def test_user_exists(client):

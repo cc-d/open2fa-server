@@ -191,15 +191,10 @@
   color: var(--mui-cyan);
 }
 
-.b58-uuid {
-  color: var(--mui-blue);
+.color-code-text {
   font-weight: bold;
-}
-
-#how-sync-works > ol > li > span,
-#how-sync-works > ol > li > ul > li > span {
-  display: block;
   font-family: monospace;
+  display: block;
 }
 
 .o2fa-id {
@@ -208,4 +203,24 @@
 
 .o2fa-enc-secret {
   color: var(--mui-deep-orange);
+}
+
+ol > li > ul > li > div > .color-code-text {
+  display: inline;
+}
+
+.nav-link-gh {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.nav-link-gh > * {
+  display: flex;
+}
+
+.nav-link-gh > img {
+  height: 1.5rem;
+  width: 1.5rem;
 }
