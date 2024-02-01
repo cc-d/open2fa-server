@@ -36,40 +36,6 @@ TOTAL166 5    97%
 
 ```
 
-# Security
-
-In the provided code, the security mechanisms are described as follows:
-
-`aes_encrypt` is used for encrypting TOTP secrets before storage.
-
-`aes_decrypt` is used for decrypting TOTP secrets when they need to be retrieved.
-
-`gen_user_hash` is used to create truncated sha256 hashes truncated to 32 characters which are used to identify users
-
-`gen_uuid` is used to generate unique identifiers (UUIDs).
-
-## How it works
-
-**THE UUID IS NEVER SENT TO THE SERVER, IT IS ONLY STORED LOCALLY**
-
-LOCAL FLOW
-
-```
-open2fa installed -> add/remove/etc keys locally -> generate codes locally
-```
-
-SERVER FLOW
-
-```
-open2fa cli init -> generate uuid -> store uuid locally ->
-
-keys are encrypted using uuid -> keys are synced to server ->
-
-keys are retrieved from server by another client ->
-
-keys are decrypted using uuid -> codes are generated locally
-```
-
 ## See sync.png for a visual representation of the flow
 
 ![Sync](sync.png)
