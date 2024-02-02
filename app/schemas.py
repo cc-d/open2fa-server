@@ -19,16 +19,13 @@ class TOTPCommon(BaseModel):
 
 
 class TOTP(TOTPCommon):
-    id: int
-    users: User
+    uhash: str
 
     model_config = ConfigDict(from_attributes=True)
 
     def __repr__(self):
-        return (
-            '<schemas.TOTP '
-            f'id={self.id} enc_secret={truncstr(self.enc_secret)} '
-            f'name={self.name}>'
+        return default_repr(
+            self, repr_format='<{obj_name} {attributes}>', join_attrs_on=' '
         )
 
 
@@ -44,6 +41,10 @@ class TOTPOut(TOTPCommon):
 
 class TOTPCreateOut(BaseModel):
     user_created: bool
+    totps: list[TOTPCommon]
+
+
+class TOTPPull(BaseModel):
     totps: list[TOTPCommon]
 
 

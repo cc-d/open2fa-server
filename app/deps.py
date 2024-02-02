@@ -1,14 +1,14 @@
 from fastapi import Depends, FastAPI, HTTPException, Request, status
 from logfunc import logf
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload, selectinload
 
 from .db import get_db
 from .models import TOTP, User
 from . import ex
 
 
-@logf()
+@logf(use_print=True)
 def get_user_from_reqhash(
     req: Request, must_exist: bool = True, db: Session = Depends(get_db)
 ) -> list[TOTP]:
@@ -18,15 +18,14 @@ def get_user_from_reqhash(
     return get_user_from_hash(uhash, must_exist=must_exist, db=db)
 
 
-@logf()
+@logf(use_print=True)
 def get_user_from_hash(
     uhash: str, must_exist: bool = True, db: Session = Depends(get_db)
 ) -> list[TOTP]:
     u = (
         db.query(User)
-        .select_from(TOTP)
-        .join(User.totps)
         .filter(User.uhash == uhash)
+        .options(selectinload(User.totps))
         .first()
     )
     if u is None and must_exist:

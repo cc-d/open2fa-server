@@ -8,6 +8,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column as mapcol, relationship as rel
 from app import db as _db
+from pyshared import default_repr
 
 
 class User(_db.Base):
@@ -40,7 +41,6 @@ class TOTP(_db.Base):
     user: Mapped[User] = rel("User", back_populates="totps")
 
     def __repr__(self):
-        return (
-            f"<models.TOTP id={self.id} enc_secret={self.enc_secret} "
-            f"name={self.name}>"
+        return default_repr(
+            self, repr_format='<{obj_name} {attributes}>', join_attrs_on=' '
         )
