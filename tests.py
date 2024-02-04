@@ -90,12 +90,15 @@ def test_list_totps(client):
     r = client.post(
         '/totps', headers={'X-User-Hash': _uid}, json={'totps': _totps}
     )
-    listed_totps = client.get('/totps', headers={'X-User-Hash': _uid}).json()
+    listed_totps = client.get('/totps', headers={'X-User-Hash': _uid}).json()[
+        'totps'
+    ]
     assert len(listed_totps) == len(_totps)
 
     r = client.get(f'/totps', headers={'X-User-Hash': _uid})
     assert r.status_code == 200
-    assert len(r.json()) == len(_totps)
+
+    assert len(r.json()['totps']) == len(_totps)
 
 
 def test_delete_totp(client):

@@ -12,6 +12,7 @@ from fastapi import Depends, FastAPI, HTTPException, status, Request
 from fastapi.routing import APIRouter
 from .deps import get_user_from_reqhash, get_user_from_hash
 from . import ex
+from .utils import addcomref, ensure_user
 
 import logging as lg
 from logfunc import logf
@@ -29,55 +30,40 @@ async def index_status():
 
 
 @router.post('/totps', response_model=schemas.TOTPCreateOut)
+@logf()
 async def push_totps(
     new_totp: schemas.TOTPIn, request: Request, db: Session = Depends(get_db)
 ) -> schemas.TOTP:
-    u = get_user_from_reqhash(request, must_exist=False, db=db)
+    db_user = get_user_from_reqhash(request, must_exist=False, db=db)
 
     user_created = False
-    if u is None:
-        lg.info('No user found for given uhash header, creating...')
-        u = models.User(uhash=request.headers.get('X-User-Hash'))
-        db.add(u)
-        db.commit()
-        db.refresh(u)
+    if db_user is None:
+        db_user = ensure_user(request.headers['X-User-Hash'], db)
         user_created = True
 
-    u_totp_map = {t.enc_secret: t for t in u.totps}
+    u_totp_map = {t.enc_secret: t for t in db_user.totps}
 
-    new_totps, up_totps = [], []
     for new_totp in new_totp.totps:
-        if new_totp.enc_secret in u_totp_map:
-            existing_totp = u_totp_map[new_totp.enc_secret]
-            if existing_totp.name != new_totp.name:
-                lg.info(
-                    f'Updating existing TOTP name from {existing_totp.name} to {new_totp.name}'
-                )
-                existing_totp.name = new_totp.name
-                db.add(existing_totp)
-                up_totps.append(
-                    schemas.TOTPCommon.model_validate(existing_totp.__dict__)
-                )
-                continue
-            lg.info(f'TOTP already exists, skipping: {new_totp}')
+        _enc_sec = new_totp.enc_secret
+        if _enc_sec in u_totp_map:
+            u_totp_map[_enc_sec].name = new_totp.name
+            db.add(u_totp_map[_enc_sec])
             continue
-        lg.info(f'Creating new TOTP: {new_totp}')
-        new_totp = models.TOTP(
-            enc_secret=new_totp.enc_secret,
-            name=new_totp.name,
-            user=u,
-            uhash=u.uhash,
-        )
-        db.add(new_totp)
-        new_totps.append(schemas.TOTPCommon.model_validate(new_totp.__dict__))
-        u_totp_map[new_totp.enc_secret] = new_totp
+        new_totp = models.TOTP(**new_totp.__dict__, uhash=db_user.uhash)
+        u_totp_map[_enc_sec] = new_totp
+
+    uniq_totps = []
+    for k, v in u_totp_map.items():
+        db.add(v)
+        uniq_totps.append(schemas.TOTP.model_validate(v))
 
     db.commit()
 
-    return {'user_created': user_created, 'totps': new_totps + up_totps}
+    return {'user_created': user_created, 'totps': uniq_totps}
 
 
 @router.get('/totps', response_model=schemas.TOTPPull)
+@logf()
 async def pull_totps(
     u: models.User = Depends(get_user_from_reqhash),
 ) -> list[schemas.TOTP]:
@@ -87,6 +73,7 @@ async def pull_totps(
 
 
 @router.delete('/totp/{enc_secret}', response_model=schemas.TOTPDeleteOut)
+@logf()
 async def delete_totp(
     enc_secret: str,
     u: models.User = Depends(get_user_from_reqhash),
