@@ -108,7 +108,8 @@ async function generateTOTPCode(secretBase32) {
     const view = new DataView(timeStepBytes);
     // TOTP uses the Unix time divided by 30 seconds to define the current time step.
     // We need to fill the ArrayBuffer with this time step value.
-    view.setUint32(4, timeStep, false); // Set the last 4 bytes, since JavaScript uses big endian and TOTP time step is a 64-bit integer
+    // Set the last 4 bytes, since JavaScript uses big endian and TOTP time step is a 64-bit integer
+    view.setUint32(4, timeStep, false);
 
     // Import the HMAC key
     const hmacKey = await crypto.subtle.importKey(
@@ -133,18 +134,45 @@ async function generateTOTPCode(secretBase32) {
   }
 
 document.addEventListener('DOMContentLoaded', function () {
-  const fetchSecretsBtn = document.getElementById('fetchSecretsBtn');
+  const fetchSecretsBtn = document.getElementById('fetchSecretBtn');
   const decryptSecretsBtn = document.getElementById('decryptSecretsBtn');
   const open2faIdInput = document.getElementById('open2faIdInput');
   const open2faSecretInput = document.getElementById('open2faSecretInput');
-  const secretsContainer = document.getElementById('secretsContainer');
+  const rememberSecretCheck = document.getElementById('rememberSecretCheck');
+  const rememberSecretsCheck = document.getElementById('rememberSecretsCheck');
+
+  // Load saved values and checkbox states
+  if (localStorage.getItem('open2faId')) {
+    open2faIdInput.value = localStorage.getItem('open2faId');
+    rememberSecretCheck.checked = localStorage.getItem('rememberSecret') === 'true';
+  }
+
+  if (localStorage.getItem('open2faSecret')) {
+    open2faSecretInput.value = localStorage.getItem('open2faSecret');
+    rememberSecretsCheck.checked = localStorage.getItem('rememberSecrets') === 'true';
+  }
+
 
   fetchSecretsBtn.addEventListener('click', async () => {
+    if (rememberSecretCheck.checked) {
+      localStorage.setItem('open2faId', open2faIdInput.value);
+      localStorage.setItem('rememberSecret', rememberSecretCheck.checked);
+    } else {
+      localStorage.removeItem('open2faId');
+      localStorage.setItem('rememberSecret', false);
+    }
     const open2faId = open2faIdInput.value.trim();
     await fetchEncryptedSecrets(open2faId);
   });
 
   decryptSecretsBtn.addEventListener('click', async () => {
+    if (rememberSecretsCheck.checked) {
+      localStorage.setItem('open2faSecret', open2faSecretInput.value);
+      localStorage.setItem('rememberSecrets', rememberSecretsCheck.checked);
+    } else {
+      localStorage.removeItem('open2faSecret');
+      localStorage.setItem('rememberSecrets', false);
+    }
     const open2faSecret = open2faSecretInput.value.trim();
     await decryptAndGenerateCodes(open2faSecret);
   });
@@ -192,8 +220,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const decryptedSecret = await decryptWithBase58(
         encryptedSecret,
         open2faSecret
-      ); // Assumes decryptWithBase58 is correctly implemented
-      const totpCode = await generateTOTPCode(decryptedSecret); // Assumes generateTOTPCode is correctly implemented
+      );
+      const totpCode = await generateTOTPCode(decryptedSecret);
       element.querySelector('.totp-code').textContent = `TOTP: ${totpCode}`;
     } catch (error) {
       console.error('Error regenerating TOTP code:', error);

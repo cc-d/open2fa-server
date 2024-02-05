@@ -195,6 +195,9 @@
   font-weight: bold;
   font-family: monospace;
   display: block;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .o2fa-id {
@@ -206,13 +209,15 @@
 }
 
 ol > li > ul > li > div > .color-code-text {
-  display: inline;
+  display: inline-block;
+  max-width: 70vw;
 }
 
 .nav-link-gh {
   display: flex;
   align-items: center;
   justify-content: center;
+  max-width: 100%;
   padding: 0.5rem;
 }
 
@@ -223,4 +228,65 @@ ol > li > ul > li > div > .color-code-text {
 .nav-link-gh > img {
   height: 1.5rem;
   width: 1.5rem;
+}
+
+
+body, #body-wrap {
+  width: 100vw;
+  min-width: 100vw;
+  overflow-x: hidden;
+}
+
+nav > *, nav > ul > * {
+  display: inline-flex;
+}
+
+ul.navbar-nav.ml-auto {
+  display: inline-flex;
+  flex-direction: row;
+}
+
+
+nav > ul {
+  width: calc(100% - 100px);
+}
+
+nav > ul > * {
+  max-width:fit-content;
+}
+
+nav, #nav-wrap {
+  display:flex;
+  flex-direction: row;
+  overflow: hidden;
+  width: 100%;
+  justify-content: center;
+}
+
+.one-line > p {
+  display: inline-flex;
+}
+
+.one-line > p >code {
+  line-height: 1.5rem;
+}
+
+.one-line-btncheck {
+  display: flex;
+}
+
+.one-line-btncheck > .form-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 1rem;
+  margin-left: 1rem;
+}
+
+.one-line-btncheck > .form-check > label {
+  padding-left: 0.5rem;
+}
+
+input#rememberSecretsCheck {
+  min-width: 1rem;
 }

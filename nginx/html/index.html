@@ -23,169 +23,238 @@
     <script src="js/index.js"></script>
   </head>
   <body class="bg-dark text-white">
-    <div class="container">
-      <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <a class="navbar-brand" href="#">open2fa</a>
-        <ul class="navbar-nav ml-auto">
-          <li class="nav-item nav-item-gh">
-            <a class="nav-link nav-link-gh" href="https://github.com/cc-d/open2fa">
-              <img src="img/github.png" alt="github" class="nav-github-img bg-dark" />
-              open2fa
-            </a>
-          </li>
-          <li class="nav-item nav-item-gh">
-            <a class="nav-link nav-link-gh" href="https://github.com/cc-d/open2fa">
-              <img src="img/github.png" alt="github" class="nav-github-img bg-dark" />
-              open2fa-server
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </div>
+    <!-- Main Content -->
+    <div id="body-wrap" class="container">
+      <div id="nav-wrap" class="container">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+          <a class="navbar-brand" href="#">open2fa</a>
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item nav-item-gh">
+              <a
+                class="nav-link nav-link-gh"
+                href="https://github.com/cc-d/open2fa"
+              >
+                <img
+                  src="img/github.png"
+                  alt="github"
+                  class="nav-github-img bg-dark"
+                />
+                open2fa
+              </a>
+            </li>
+            <li class="nav-item nav-item-gh">
+              <a
+                class="nav-link nav-link-gh"
+                href="https://github.com/cc-d/open2fa"
+              >
+                <img
+                  src="img/github.png"
+                  alt="github"
+                  class="nav-github-img bg-dark"
+                />
+                open2fa-server
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
 
+      <!-- Main -->
+      <div id="o2fa-id-sec">
+        <div class="container mt-3">
+          <h1>Generate 2FA Codes</h1>
+          <div class="one-line">
+            <p>
+              To find your Open2FA ID/Secret:&nbsp;<code>open2fa info</code>
+            </p>
+          </div>
+          <input
+            type="text"
+            id="open2faIdInput"
+            placeholder="Enter your Open2FA ID"
+            class="form-control"
+          />
+          <div class="one-line-btncheck">
+            <button id="fetchSecretBtn" class="btn btn-primary mt-3">
+              Fetch Secret
+            </button>
+            <!-- Remember Checkbox -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value=""
+                id="rememberSecretCheck"
+              />
+              <label class="form-check
+                " for="rememberSecretCheck">
+                remember
+              </label>
+            </div>
+          </div>
+        </div>
+        <div id="secretsContainer" class="container mt-3"></div>
+        <div class="container mt-3">
+          <input
+            type="text"
+            id="open2faSecretInput"
+            placeholder="Enter your Open2FA Secret"
+            class="form-control"
+          />
+          <div class="one-line-btncheck">
+            <button id="decryptSecretsBtn" class="btn btn-success mt-3">
+              Decrypt Secrets
+            </button>
+            <!-- Remember Checkbox -->
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                value=""
+                id="rememberSecretsCheck"
+              />
+              <label class="form-check" for="rememberSecretsCheck">
+                remember
+              </label>
+            </div>
+          </div>
+        </div>
+        <div id="countdownContainer" class="mt-3"></div>
+      </div>
 
-    <!-- Main -->
-    <div class="container mt-5">
-      <input type="text" id="open2faIdInput" placeholder="Enter your Open2FA ID" class="form-control">
-      <button id="fetchSecretsBtn" class="btn btn-primary mt-3">Fetch Secrets</button>
-    </div>
-    <div id="secretsContainer" class="container mt-3"></div>
-    <div class="container mt-3">
-      <input type="text" id="open2faSecretInput" placeholder="Enter your Open2FA Secret" class="form-control">
-      <button id="decryptSecretsBtn" class="btn btn-success mt-3">Decrypt Secrets</button>
-    </div>
-    <div id="countdownContainer" class="mt-3"></div>
+      <!-- How Sync Works -->
+      <div class="container mt-4">
+        <div class="bg-dark text-light" id="how-sync-works">
+          <h1>How it works</h1>
+          <h4>Local Client</h4>
+          <ol>
+            <li>
+              User adds a new TOTP secret to their open2fa client:
+              <span class="totp-sec color-code-text">I65VU7K5ZQL7WB4E</span>
+            </li>
+            <li>
+              User generates a TOTP code from their open2fa client:
+              <span class="totp-gen-sec color-code-text">123456</span>
+            </li>
+          </ol>
+          <h4>Remote Synchronization and 2FA Code Generation (optional)</h4>
+          <ol>
+            <li>
+              User is assigned a UUID when initializing the remote capabilities
+              of the open2fa client:
+              <span class="user-uuid color-code-text"
+                >692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span
+              >
+            </li>
 
+            <li>
+              A sha256 hash of the UUID is generated:
+              <span class="uuid-hash color-code-text">
+                7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45
+              </span>
+            </li>
 
-    <!-- How Sync Works -->
-    <div class="container">
-      <div class="bg-dark p-3 text-light" id="how-sync-works">
-        <h1>How it works:</h1>
-        <h4>Local Client</h4>
-        <ol>
-          <li>
-            User adds a new TOTP secret to their open2fa client:
-            <span class="totp-sec color-code-text">I65VU7K5ZQL7WB4E</span>
-          </li>
-          <li>
-            User generates a TOTP code from their open2fa client:
-            <span class="totp-gen-sec color-code-text">123456</span>
-          </li>
-        </ol>
-        <h4>Remote Synchronization and 2FA Code Generation (optional)</h4>
-        <ol>
-          <li>
-            User is assigned a UUID when initializing the remote capabilities of
-            the open2fa client:
-            <span class="user-uuid color-code-text"
-              >692a3e6b-4bd4-400b-aa2b-8261695b5ffb</span
-            >
-          </li>
-
-          <li>
-            A sha256 hash of the UUID is generated:
-            <span class="uuid-hash color-code-text">
-              7f3bdb296509426c9ce9ec543e70c4200231af1247b1e22052a346c4e7901c45
-            </span>
-          </li>
-
-          <li>
-            The 32 bytes of this hash are split into two parts and used for the
-            following purposes:
-            <ul>
-              <li>
-                The first 16 bytes of the hash are used for user identification,
-                when encoded into base58 this is the Open2FA ID:
-                <span class="o2fa-id color-code-text"
-                  >GiG4Xz1tmTnG3CVh38raYX</span
-                >
-                This is used to identify the user to the server during api
-                requests, as well as for authentication if generating a TOTP
-                code from the web ui.
-              </li>
-              <li>
-                The remaining 16 bytes of the hash are used for encryption of
-                the TOTP secret when stored on the remote server:
-                <span class="o2fa-enc-secret color-code-text"
-                  >GiRVCWuSBPaVM7xfER9h6</span
-                >
-                This should never be shared with the server. If using the webui,
-                a user must provide this value to enable decryption, but it is
-                never sent to the server - any decryption happens exclusively on
-                the client side. This is the major reason the frontend
-                javascript has been kept as simple as possible.
-              </li>
-            </ul>
-          </li>
-          <li>
-            The TOTP secret is encrypted using the last 16 bytes of the UUID
-            hash
-            <span class="enc-totp-secret color-code-text"
-              >692a3e6b4bd4400baa2b8261695b5ffb</span
-            >
-          </li>
-
-          <li>
-            User identifies themselves to the server by sending a base58 encoded
-            version of the first 16 bytes of the UUID hash:
-            <span class="o2fa-id color-code-text">GiG4Xz1tmTnG3CVh3raYX</span>
-          </li>
-          <li>
-            Server shares the ENCRYPTED TOTP secrets matching the Open2FA ID
-            provided by the user:
-            <ul>
-              <li>
-                <div>
-                  Open2FA ID:
+            <li>
+              The 32 bytes of this hash are split into two parts and used for
+              the following purposes:
+              <ul>
+                <li>
+                  The first 16 bytes of the hash are used for user
+                  identification, when encoded into base58 this is the Open2FA
+                  ID:
                   <span class="o2fa-id color-code-text"
-                    >GiG4Xz1tmTnG3CVh3raYX</span
+                    >GiG4Xz1tmTnG3CVh38raYX</span
                   >
-                </div>
-              </li>
-              <li>
-                <div>
-                  Encrypted TOTP secret:
-                  <span class="enc-totp-secret color-code-text">
-                    692a3e6b4bd4400baa2b8261695b5ffb
-                  </span>
-                </div>
-              </li>
-            </ul>
-          </li>
-          <li>
-            User decrypts the TOTP code using their locally stored Open2FA
-            encryption secret (the last 16 bytes of the UUID hash):
-            <ul>
-              <li>
-                <div>
-                  Open2FA encryption secret:
+                  This is used to identify the user to the server during api
+                  requests, as well as for authentication if generating a TOTP
+                  code from the web ui.
+                </li>
+                <li>
+                  The remaining 16 bytes of the hash are used for encryption of
+                  the TOTP secret when stored on the remote server:
                   <span class="o2fa-enc-secret color-code-text"
                     >GiRVCWuSBPaVM7xfER9h6</span
                   >
-                </div>
-              </li>
-              <li>
-                <div>
-                  Encrypted TOTP secret:
-                  <span class="enc-totp-secret color-code-text">
-                    692a3e6b4bd4400baa2b8261695b5ffb
-                  </span>
-                </div>
-              </li>
-              <li>
-                <div>
-                  Decrypted TOTP secret:
-                  <span class="totp-sec color-code-text">I65VU7K5ZQL7WB4E</span>
-                </div>
-              </li>
-            </ul>
-          </li>
+                  This should never be shared with the server. If using the
+                  webui, a user must provide this value to enable decryption,
+                  but it is never sent to the server - any decryption happens
+                  exclusively on the client side. This is the major reason the
+                  frontend javascript has been kept as simple as possible.
+                </li>
+              </ul>
+            </li>
+            <li>
+              The TOTP secret is encrypted using the last 16 bytes of the UUID
+              hash
+              <span class="enc-totp-secret color-code-text"
+                >692a3e6b4bd4400baa2b8261695b5ffb</span
+              >
+            </li>
 
-          <li>
-            The decrypted TOTP secret is then used to generate a TOTP code:
-            <span class="totp-gen-sec color-code-text">123456</span>
-          </li>
-        </ol>
+            <li>
+              User identifies themselves to the server by sending a base58
+              encoded version of the first 16 bytes of the UUID hash:
+              <span class="o2fa-id color-code-text">GiG4Xz1tmTnG3CVh3raYX</span>
+            </li>
+            <li>
+              Server shares the ENCRYPTED TOTP secrets matching the Open2FA ID
+              provided by the user:
+              <ul>
+                <li>
+                  <div>
+                    Open2FA ID:
+                    <span class="o2fa-id color-code-text"
+                      >GiG4Xz1tmTnG3CVh3raYX</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    Encrypted TOTP secret:
+                    <span class="enc-totp-secret color-code-text">
+                      692a3e6b4bd4400baa2b8261695b5ffb
+                    </span>
+                  </div>
+                </li>
+              </ul>
+            </li>
+            <li>
+              User decrypts the TOTP code using their locally stored Open2FA
+              encryption secret (the last 16 bytes of the UUID hash):
+              <ul>
+                <li>
+                  <div>
+                    Open2FA encryption secret:
+                    <span class="o2fa-enc-secret color-code-text"
+                      >GiRVCWuSBPaVM7xfER9h6</span
+                    >
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    Encrypted TOTP secret:
+                    <span class="enc-totp-secret color-code-text">
+                      692a3e6b4bd4400baa2b8261695b5ffb
+                    </span>
+                  </div>
+                </li>
+                <li>
+                  <div>
+                    Decrypted TOTP secret:
+                    <span class="totp-sec color-code-text"
+                      >I65VU7K5ZQL7WB4E</span
+                    >
+                  </div>
+                </li>
+              </ul>
+            </li>
+
+            <li>
+              The decrypted TOTP secret is then used to generate a TOTP code:
+              <span class="totp-gen-sec color-code-text">123456</span>
+            </li>
+          </ol>
+        </div>
       </div>
     </div>
   </body>
