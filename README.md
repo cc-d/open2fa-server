@@ -33,6 +33,12 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+You will probably also need to install `sqlite3`:
+
+```bash
+sudo apt-get install sqlite3
+```
+
 ## Usage
 
 To run the server, simply execute:
