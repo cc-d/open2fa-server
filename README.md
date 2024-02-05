@@ -30,7 +30,7 @@ Then, create a virtual environment and install the dependencies:
 cd open2fa
 python3 -m venv venv
 source venv/bin/activate
-pip install -r requirements.txt
+pip install -r reqs.txt
 ```
 
 You will probably also need to install `sqlite3`:
