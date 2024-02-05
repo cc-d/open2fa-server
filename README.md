@@ -1,41 +1,61 @@
 # open2fa-server
 
-api/webui for open2fa
+[open2fa.liberfy.ai](https://open2fa.liberfy.ai) NOW LIVE
 
-https://github.com/cc-d/open2fa/blob/main/README.md
+[open2fa client](https://github.com/cc-d/open2fa)
 
-# Testing
+This is the code for the webui/api enabling the remote capabilities of the open2fa client.
 
-As of 2024-01-21, just finished the tests today.
+## Security
+
+The Frontend Javascript has been kept to absolute minimum for security reasons, and is implemented entirely in VanillaJS without any 3rd party libraries or frameworks. All the frontend code is in `nginx/html/js/index.js`. That being said, if you have serious security concerns, you should not be generating 2FA codes using the webui, and should instead use the open2fa client exclusively.
+
+## How it works
+
+See: [open2fa.liberfy.ai](https://open2fa.liberfy.ai)
+
+![how it works](/sync.png)
+
+## Installation
+
+First, clone the repository:
 
 ```bash
-tests.py::test_index_status PASSED
-tests.py::test_no_user_hash PASSED
-tests.py::test_no_user_found PASSED
-tests.py::test_create_totp_no_org PASSED
-tests.py::test_user_exists PASSED
-tests.py::test_multiple_user_same_totp PASSED
-tests.py::test_list_totps PASSED
-tests.py::test_delete_totp PASSED
-tests.py::test_totp_create_exists PASSED
-tests.py::test_no_totp_for_user_with_enc_secret PASSED
-
----------- coverage: platform darwin, python 3.11.7-final-0 ----------
-Name    Stmts   Miss  Cover   Missing
------------------------------------------------
-app/__init__.py  0 0   100%
-app/config.py    6 0   100%
-app/db.py  14 0   100%
-app/deps.py19 0   100%
-app/ex.py  13 0   100%
-app/main.py69 2    97%   105, 121
-app/models.py   18 1    94%   47
-app/schemas.py  27 2    93%   13, 28
------------------------------------------------
-TOTAL166 5    97%
-
+git clone https://github.com/cc-d/open2fa.git
 ```
 
-## See sync.png for a visual representation of the flow
+Then, create a virtual environment and install the dependencies:
 
-![Sync](sync.png)
+```bash
+cd open2fa
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+## Usage
+
+To run the server, simply execute:
+
+```bash
+./uvicorn.sh
+```
+
+### Docker
+
+To run the server using Docker, simply execute:
+
+```bash
+docker-compose build
+docker-compose up
+```
+
+And then navigate to `http://localhost:80` in your web browser.
+
+## Testing
+
+To run the tests, simply execute:
+
+```bash
+./run_tests.sh
+```
