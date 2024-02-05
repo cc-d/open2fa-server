@@ -290,3 +290,13 @@ nav, #nav-wrap {
 input#rememberSecretsCheck {
   min-width: 1rem;
 }
+
+.secret-name {
+  margin-right: 1rem;
+}
+
+.countdown {
+  text-align: right;
+  width: 100%;
+}
+

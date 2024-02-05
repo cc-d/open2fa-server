@@ -72,19 +72,28 @@ async def pull_totps(
     )
 
 
-@router.delete('/totp/{enc_secret}', response_model=schemas.TOTPDeleteOut)
+@router.delete('/totps', response_model=schemas.TOTPDeleteOut)
 @logf()
 async def delete_totp(
-    enc_secret: str,
+    del_totps: schemas.TOTPDeleteIn,
     u: models.User = Depends(get_user_from_reqhash),
     db: Session = Depends(get_db),
 ):
-    utotp = next((t for t in u.totps if t.enc_secret == enc_secret), None)
-    if utotp is None:
-        raise ex.NoTOTPFoundException()
-    db.delete(utotp)
-    db.commit()
-    return schemas.TOTPDeleteOut()
+
+    del_utotps = []
+
+    for totp in u.totps:
+        for del_totp in del_totps.totps:
+            if totp.enc_secret == del_totp.enc_secret:
+                del_utotps.append(totp)
+
+    len_diff = len(u.totps) - len(del_utotps)
+    for totp in del_utotps:
+        db.delete(totp)
+    if len_diff > 0:
+        db.commit()
+
+    return {'deleted': len_diff}
 
 
 app.include_router(router)

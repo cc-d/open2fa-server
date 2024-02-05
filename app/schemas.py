@@ -49,4 +49,8 @@ class TOTPPull(BaseModel):
 
 
 class TOTPDeleteOut(BaseModel):
-    success: bool = True
+    deleted: int
+
+
+class TOTPDeleteIn(BaseModel):
+    totps: List[TOTPCommon]

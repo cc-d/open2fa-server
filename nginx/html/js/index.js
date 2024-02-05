@@ -200,11 +200,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Calculate the time left until the next 30-second window
     let timeLeft = 30 - (Math.floor(Date.now() / 1000) % 30);
     const countdownElement = element.querySelector('.countdown');
-    countdownElement.textContent = ` - Expires in: ${timeLeft} sec`;
+    countdownElement.textContent = `${timeLeft}s`;
 
     const countdownInterval = setInterval(() => {
       timeLeft--;
-      countdownElement.textContent = ` - Expires in: ${timeLeft} sec`;
+      countdownElement.textContent = `${timeLeft}s`;
 
       if (timeLeft <= 0) {
         clearInterval(countdownInterval); // Clear the existing interval
@@ -222,7 +222,9 @@ document.addEventListener('DOMContentLoaded', function () {
         open2faSecret
       );
       const totpCode = await generateTOTPCode(decryptedSecret);
-      element.querySelector('.totp-code').textContent = `TOTP: ${totpCode}`;
+      element.querySelector('.totp-code').textContent = `${totpCode}`;
+      element.querySelector('.totp-code').classList.add('mui-light-green');
+      element.querySelector('.totp-code').classList.remove('mui-red');
     } catch (error) {
       console.error('Error regenerating TOTP code:', error);
     }
@@ -245,17 +247,20 @@ document.addEventListener('DOMContentLoaded', function () {
       secretElement.classList.add(
         'encrypted-secret',
         'd-flex',
-        'justify-content-between',
-        'align-items-center'
+
       );
       secretElement.dataset.encSecret = secret.enc_secret;
 
       const nameLabel = document.createElement('span');
-      nameLabel.textContent = secret.name || 'Unnamed Secret';
+      nameLabel.classList.add('secret-name');
+      nameLabel.textContent = secret.name + ':' || 'Unnamed Secret:';
       secretElement.appendChild(nameLabel);
 
       const codeLabel = document.createElement('span');
+      codeLabel.textContent = ' (encrypted)';
       codeLabel.classList.add('totp-code');
+      codeLabel.classList.add('mui-red');
+      codeLabel.classList.remove('mui-light-green');
       secretElement.appendChild(codeLabel);
 
       const countdownLabel = document.createElement('span');
