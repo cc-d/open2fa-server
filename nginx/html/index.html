@@ -66,12 +66,21 @@
               To find your Open2FA ID/Secret:&nbsp;<code>open2fa info</code>
             </p>
           </div>
-          <input
-            type="text"
-            id="open2faIdInput"
-            placeholder="Enter your Open2FA ID"
-            class="form-control"
-          />
+          <p>
+            For more information, see the <a href="https://github.com/cc-d/open2fa">open2fa README</a>
+          </p>
+
+          <div class="o2fa-input-wrap">
+
+            <label for="open2faIdInput">Open2FA ID</label>
+            <input
+              type="text"
+              id="open2faIdInput"
+              placeholder="Enter your Open2FA ID"
+              class="form-control"
+            />
+
+          </div>
           <div class="one-line-btncheck">
             <button id="fetchSecretBtn" class="btn btn-primary mt-3">
               Fetch Secrets
@@ -93,18 +102,24 @@
         </div>
         <div id="secretsContainer" class="container mt-3"></div>
         <div class="container mt-3">
-          <input
+          <div class="o2fa-input-wrap">
+            <label for="open2faSecretInput">Open2FA Secret</label>
+            <input
             type="text"
             id="open2faSecretInput"
             placeholder="Enter your Open2FA Secret"
             class="form-control"
-          />
+            />
+
+
+          </div>
           <div class="one-line-btncheck">
             <button id="decryptSecretsBtn" class="btn btn-success mt-3">
               Decrypt Secrets
             </button>
             <!-- Remember Checkbox -->
             <div class="form-check">
+
               <input
                 class="form-check-input"
                 type="checkbox"
