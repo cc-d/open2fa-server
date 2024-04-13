@@ -211,6 +211,7 @@
 ol > li > ul > li > div > .color-code-text {
   display: inline-block;
   max-width: 70vw;
+  margin-bottom: -1rem;
 }
 
 .nav-link-gh {
